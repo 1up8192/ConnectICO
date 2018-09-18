@@ -53,8 +53,12 @@ contract Pool {
         _;
     }
     
-    constructor(address _provider, address _creator, uint _creatorFeeRate, uint _providerFeeRate, address _saleAddress, address _tokenAddress, bool _whitelistPool,
-    uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock){
+    constructor(
+        address _provider, address _creator, uint _creatorFeeRate, 
+        uint _providerFeeRate, address _saleAddress, address _tokenAddress, bool _whitelistPool,
+        uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, 
+        uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock
+    ){
         provider = _provider;
         creator = _creator;
         admins[creator] = true;

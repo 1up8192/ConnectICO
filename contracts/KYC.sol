@@ -5,4 +5,41 @@ contract KYC {
     mapping(address => bool) admins; 
     mapping(address => bool) kycAddresses;
     
+    modifier onlyOwner{
+        require(msg.sender == owner);
+        _;
+    }
+    
+    modifier onlyAdmin{
+        require(admins[msg.sender]);
+        _;
+    }
+
+    function addAdmin(address[] addressList) public onlyOwner {
+        for(uint i = 0; i < addressList.length; i++){
+            admins[addressList[i]] = true;
+        }
+    }
+
+    function addAdmin(address adminAddress) public onlyOwner {
+        admins[adminAddress] = true;
+    }
+
+    function removeAdmin(address adminAddress) public onlyOwner {
+        admins[adminAddress] = false;
+    }
+
+    function addKYCAddress(address[] addressList) public onlyAdmin {
+        for(uint i = 0; i < addressList.length; i++){
+            kycAddresses[addressList[i]] = true;
+        }
+    }
+
+    function addKYCAddress(address KYCAddress) public onlyAdmin {
+        kycAddresses[KYCAddress] = true;
+    }
+
+    function removeKYCAddress(address KYCAddress) public onlyAdmin {
+        kycAddresses[KYCAddress] = false;
+    }
 }

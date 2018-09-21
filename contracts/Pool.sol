@@ -76,16 +76,32 @@ contract Pool {
         withdrawTimelock = _withdrawTimelock;
     }
     
-    function addAdmins(address[] addressList) public onlyCreator {
+    function addAdmin(address[] addressList) public onlyCreator {
         for(uint i = 0; i < addressList.length; i++){
             admins[addressList[i]] = true;
         }
     }
 
-    function addToWhitelist(address[] addressList) public onlyAdmin {
+    function addAdmin(address adminAddress) public onlyCreator {
+        admins[adminAddress] = true;
+    }
+
+    function removeAdmin(address adminAddress) public onlyCreator {
+        admins[adminAddress] = false;
+    }
+
+    function addWhitelist(address[] addressList) public onlyAdmin {
         for(uint i = 0; i < addressList.length; i++){
             whitelist[addressList[i]] = true;
         }
+    }
+
+    function addWhitelist(address whitelistAddress) public onlyAdmin {
+        whitelist[whitelistAddress] = true;
+    }
+
+    function removeWhitelist(address whitelistAddress) public onlyAdmin {
+        whitelist[whitelistAddress] = false;
     }
     
     function contribute() public payable {

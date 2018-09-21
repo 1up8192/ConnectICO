@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "./KYC.sol";
+
 contract Pool {
     
     struct contributorData{
@@ -7,7 +9,9 @@ contract Pool {
         uint grossContribution;
         bool payedOut;
     }
-    
+
+
+    address public kycAddress;   
     address public provider; //connectICO address for fees
     address public creator; //pool creator address
     uint public providerFeeRate;
@@ -54,11 +58,12 @@ contract Pool {
     }
     
     constructor(
-        address _provider, address _creator, uint _creatorFeeRate, 
+        address _kycAddress, address _provider, address _creator, uint _creatorFeeRate, 
         uint _providerFeeRate, address _saleAddress, address _tokenAddress, bool _whitelistPool,
         uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, 
         uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock
-    ){
+    ) public {
+        kycAddress = _kycAddress;
         provider = _provider;
         creator = _creator;
         admins[creator] = true;
@@ -78,11 +83,13 @@ contract Pool {
     
     function addAdmin(address[] addressList) public onlyCreator {
         for(uint i = 0; i < addressList.length; i++){
+            require(KYC(kycAddress).checkKYC(addressList[i]));
             admins[addressList[i]] = true;
         }
     }
 
     function addAdmin(address adminAddress) public onlyCreator {
+        require(KYC(kycAddress).checkKYC(adminAddress));
         admins[adminAddress] = true;
     }
 
@@ -92,11 +99,13 @@ contract Pool {
 
     function addWhitelist(address[] addressList) public onlyAdmin {
         for(uint i = 0; i < addressList.length; i++){
+            require(KYC(kycAddress).checkKYC(addressList[i]));
             whitelist[addressList[i]] = true;
         }
     }
 
     function addWhitelist(address whitelistAddress) public onlyAdmin {
+        require(KYC(kycAddress).checkKYC(whitelistAddress));
         whitelist[whitelistAddress] = true;
     }
 
@@ -106,7 +115,7 @@ contract Pool {
     
     function contribute() public payable {
         if(whitelistPool) require(whitelist[msg.sender]);
-        //require(kyc[msg.sender]); todo
+        require(KYC(kycAddress).checkKYC(msg.sender));
         require(msg.value >= minContribution);
         require(maxContribution == 0 || msg.value <= maxContribution);
         require(maxPoolAllocation == 0 || msg.value + allGrossContributions <= maxPoolAllocation);
@@ -164,7 +173,9 @@ contract Pool {
 
     //todo fallback
 
-    //todo kyc
+    //todo erc20 import (oz)
 
-    //todo erc20 import
+    //todo provider withdraw
+
+    //todo creator withdraw
 }

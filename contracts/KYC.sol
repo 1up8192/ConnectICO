@@ -2,8 +2,8 @@ pragma solidity ^0.4.24;
 
 contract KYC {
     address public owner;
-    mapping(address => bool) admins; 
-    mapping(address => bool) kycAddresses;
+    mapping(address => bool) public admins; 
+    mapping(address => bool) public kycAddresses;
     
     modifier onlyOwner{
         require(msg.sender == owner);
@@ -41,5 +41,9 @@ contract KYC {
 
     function removeKYCAddress(address KYCAddress) public onlyAdmin {
         kycAddresses[KYCAddress] = false;
+    }
+
+    function checkKYC(address addr) public view returns (bool){
+        return kycAddresses[addr];
     }
 }

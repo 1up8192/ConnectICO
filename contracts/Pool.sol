@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./KYC.sol";
+import './KYC.sol';
+import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 
 contract Pool {
     
@@ -18,7 +19,7 @@ contract Pool {
     uint public creatorFeeRate;
     mapping(address => bool) public admins; //additional admins
     address public saleAddress; //address of token sale
-    address[] public tokenAddresses; //todo change type to erc20 // address of erc20 token contract
+    address public tokenAddress; // address of erc20 token contract
     bool public whitelistPool;
     mapping(address => bool) public whitelist; 
     uint public saleStartDate;
@@ -36,6 +37,7 @@ contract Pool {
     address[] contributorList;
     uint public creatorStash;
     uint public providerStash;
+    bool tokensReceivedConfirmed;
     
     modifier onlyCreator{
         require(msg.sender == creator);
@@ -70,7 +72,7 @@ contract Pool {
         providerFeeRate = _providerFeeRate;
         creatorFeeRate = _creatorFeeRate;
         saleAddress = _saleAddress;
-        if(_tokenAddress != 0x0) tokenAddresses.push(_tokenAddress);
+        tokenAddress = _tokenAddress;
         whitelistPool = _whitelistPool;
         saleStartDate = _saleStartDate;
         saleEndDate = _saleEndDate;
@@ -147,24 +149,36 @@ contract Pool {
         msg.sender.transfer(amount);        
     }
     
-    function withdrawToken(){
+    function withdrawToken() public {
         require(sentToSale);
     }
 
-    function withdrawCustomToken(){
+    function withdrawCustomToken(address customTokenAddress) public{
+        require(sentToSale);
+    }
+    
+    function pushOutToken() public {
+        
+    }
+    
+    function changeTokenAddress(address _tokenAddress) public onlyCreator{
+        require(!tokensReceivedConfirmed);
+        tokenAddress = _tokenAddress;
+    }
 
+    function confirmTokensReceived(uint tokensExpected) public onlyCreator{
+        require(sentToSale);
+        require(!tokensReceivedConfirmed);
+        require (tokensExpected > 0);
+        if(ERC20(tokenAddress).balanceOf(address(this)) > tokensExpected) tokensReceivedConfirmed = true;
     }
     
-    function pushOutToken(){
-        
-    }
-    
-    function addToken() onlyAdmin{
-        
-    }
-    
-    function sendToSale() onlyAdmin{
+    function sendToSale() public onlyAdmin{
         //take fees
+    }
+
+    function calculateNetContribution() public view {
+
     }
 
     //todo setters
@@ -173,9 +187,9 @@ contract Pool {
 
     //todo fallback
 
-    //todo erc20 import (oz)
-
     //todo provider withdraw
 
     //todo creator withdraw
+
+    //todo require error messages
 }

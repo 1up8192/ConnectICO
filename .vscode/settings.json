@@ -1,3 +1,16 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+
+    "solidity.soliumRules": {
+        "imports-on-top": 0,
+        "variable-declarations": 0,
+        "indentation": 0/*[
+          "error",
+          4
+        ]*/,
+        "quotes": 0/*[
+          "error",
+          "double"
+        ]*/
+      },
 }

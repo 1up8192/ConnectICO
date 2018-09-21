@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./Pool.sol";
-import "./KYC.sol";
+import './Pool.sol';
+import './KYC.sol';
 
 contract PoolFactory{
     address owner;
@@ -32,7 +32,7 @@ contract PoolFactory{
     ) public payable {
         //todo checks
         require(KYC(kycAddress).checkKYC(msg.sender));
-        require(flatFee + maxAllocationFeeRate * maxPoolAllocation >= msg.value);
+        require(flatFee + maxAllocationFeeRate * _maxPoolAllocation >= msg.value);
         require(maxCreatorFeeRate >= _creatorFeeRate);
         address poolAddress = new Pool(kycAddress, owner, msg.sender, _creatorFeeRate, providerfeeRate, _saleAddress, 
         _tokenAddress, _whitelistPool, _saleStartDate, _saleEndDate,

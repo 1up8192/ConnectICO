@@ -141,6 +141,7 @@ contract Pool {
     function withdraw() public{
         require(!sentToSale);
         require(contributors[msg.sender].lastContributionTime + withdrawTimelock > now);
+        require(!contributors[msg.sender].payedOut);
         contributors[msg.sender].payedOut = true;
         allGrossContributions -= contributors[msg.sender].grossContribution;
         uint amount = contributors[msg.sender].grossContribution;
@@ -148,17 +149,25 @@ contract Pool {
         contributors[msg.sender].payedOut = true;
         msg.sender.transfer(amount);        
     }
+
+    function withdrawRefund() public{
+        require(sentToSale);
+        require(!contributors[msg.sender].payedOut);
+        //require(a feeknél több ether van bent);     
+    }
     
     function withdrawToken() public {
         require(sentToSale);
+        //todo
     }
 
     function withdrawCustomToken(address customTokenAddress) public{
         require(sentToSale);
     }
     
-    function pushOutToken() public {
-        
+    function pushOutToken(address recipient) public onlyAdmin{
+        require(sentToSale);
+        //todo
     }
     
     function changeTokenAddress(address _tokenAddress) public onlyCreator{
@@ -174,22 +183,35 @@ contract Pool {
     }
     
     function sendToSale() public onlyAdmin{
+        //todo
         //take fees
     }
 
     function calculateNetContribution() public view {
-
+        //todo
     }
+    
+
+    function () public payable{
+        //empty fallback to take refund tx-s
+    }
+
+    function poviderWithdraw() public onlyProvider{
+        uint amount = providerStash;
+        providerStash = 0;
+        creator.transfer(amount);
+    }
+
+    function creatorWithdraw() public onlyCreator{
+        uint amount = creatorStash;
+        creatorStash = 0;
+        creator.transfer(amount);
+    }
+
+    //todo fee taking
 
     //todo setters
 
-    //todo confirm tokens received
-
-    //todo fallback
-
-    //todo provider withdraw
-
-    //todo creator withdraw
-
     //todo require error messages
+
 }

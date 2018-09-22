@@ -163,6 +163,7 @@ contract Pool {
 
     function withdrawCustomToken(address customTokenAddress) public{
         require(sentToSale);
+        //todo
     }
     
     function pushOutToken(address recipient) public onlyAdmin{

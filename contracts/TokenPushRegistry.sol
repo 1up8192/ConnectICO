@@ -42,4 +42,7 @@ contract TokenPushRegistry {
     function setpushGasCost(uint _pushGasCost) public onlyOwner {
         pushGasCost = _pushGasCost;
     }
+
+    //todo require error messages
+
 }

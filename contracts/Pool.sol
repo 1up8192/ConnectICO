@@ -29,6 +29,7 @@ contract Pool {
     uint public minPoolGoal;  //minimum amount needed for the sale
     uint public maxPoolAllocation; //maximum amount raisable by pool
     uint public withdrawTimelock;
+    mapping(string => bool) kycCountryBlacklist; //key: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
     
     
     uint public allGrossContributions;
@@ -90,7 +91,7 @@ contract Pool {
         }
     }
 
-    function addAdmin(address adminAddress) public onlyCreator {
+function addAdmin(address adminAddress) public onlyCreator {
         require(KYC(kycAddress).checkKYC(adminAddress));
         admins[adminAddress] = true;
     }
@@ -113,6 +114,20 @@ contract Pool {
 
     function removeWhitelist(address whitelistAddress) public onlyAdmin {
         whitelist[whitelistAddress] = false;
+    }
+
+    function addCountryBlacklist(bytes3[] countryList) public onlyAdmin {
+        for(uint i = 0; i < countryList.length; i++){
+            kycCountryBlacklist[bytes3ToString(countryList[i])] = true;
+        }
+    }
+
+    function addCountryBlacklist(string country) public onlyAdmin {
+        kycCountryBlacklist[country] = true;
+    }
+
+    function removeCountryBlacklist(string country) public onlyAdmin {
+        kycCountryBlacklist[country] = false;
     }
     
     function contribute() public payable {
@@ -207,6 +222,23 @@ contract Pool {
         uint amount = creatorStash;
         creatorStash = 0;
         creator.transfer(amount);
+    }
+
+    function bytes3ToString(bytes3 x) private pure returns (string) {
+        bytes memory bytesString = new bytes(3);
+        uint charCount = 0;
+        for (uint j = 0; j < 3; j++) {
+            byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+            if (char != 0) {
+                bytesString[charCount] = char;
+                charCount++;
+            }
+        }
+        bytes memory bytesStringTrimmed = new bytes(charCount);
+        for (j = 0; j < charCount; j++) {
+            bytesStringTrimmed[j] = bytesString[j];
+        }
+        return string(bytesStringTrimmed);
     }
 
     //todo fee taking

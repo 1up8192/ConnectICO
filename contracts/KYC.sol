@@ -16,6 +16,11 @@ contract KYC {
         _;
     }
 
+    constructor () public {
+        owner = msg.sender;
+        admins[owner] = true;
+    }
+
     function addAdmin(address[] addressList) public onlyOwner {
         for(uint i = 0; i < addressList.length; i++){
             admins[addressList[i]] = true;

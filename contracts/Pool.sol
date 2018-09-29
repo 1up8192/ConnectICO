@@ -1,15 +1,14 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
 
 import './KYC.sol';
-import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol';
 
 contract Pool {
     
     struct contributorData{
         uint lastContributionTime;
         uint grossContribution;
-        bool payedOut;
+        mapping(address => uint) payedOut; //(tokenAddress => amountPayedOut) 0x0 address: ETH
     }
 
     uint ETHEREUM_DECIMALS = 18;
@@ -38,6 +37,7 @@ contract Pool {
     
     uint public allGrossContributions;
     mapping(address => contributorData) public contributors;
+    mapping(address => uint) totalPayedOut; //(tokenAddress => totalAmountPayedOut) 0x0 address: ETH
     bool public sentToSale;
     address[] contributorList;
     uint public creatorStash;
@@ -163,11 +163,23 @@ function addAdmin(address adminAddress) public onlyCreator {
     }
 
     function reciprocalContributionRationPow18(address contributor) private view returns (uint) {
-        return allGrossContributions ** ETHEREUM_DECIMALS / contributors[msg.sender].grossContribution;
+        return allGrossContributions ** ETHEREUM_DECIMALS / contributors[contributor].grossContribution;
     }
 
     function calculateReward(uint toDistribute, address contributor) private view returns (uint) {
         return toDistribute ** ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor);
+    }
+
+    function calculateERC20OwnedToContributor(address tokenType, address contributor) private view returns (uint) {
+        uint totalIncome = totalPayedOut[tokenType] + ERC20Basic(tokenType).balanceOf(address(this));
+        uint totalReward = calculateReward(totalIncome, contributor);
+        return totalReward - contributors[contributor].payedOut[tokenType];
+    }
+
+    function calculateETHOwnedToContributor(address contributor) private view returns (uint) {
+        uint totalIncome = totalPayedOut[0x0] + (address(this).balance - (creatorStash + providerStash));
+        uint totalReward = calculateReward(totalIncome, contributor);
+        return totalReward - contributors[contributor].payedOut[0x0];
     }
     
     function withdraw() public{
@@ -182,23 +194,29 @@ function addAdmin(address adminAddress) public onlyCreator {
 
     function withdrawRefund() public{
         require(sentToSale);
-        require(!contributors[msg.sender].payedOut);
-        //require(a feeknél több ether van bent);     
+        uint amount = calculateETHOwnedToContributor(msg.sender);
+        contributors[msg.sender].payedOut[0x0] += amount;
+        msg.sender.transfer(amount);
     }
     
-    function withdrawToken() public {
+    function sendOutToken(address _tokenAddress, address recipient) private{
         require(sentToSale);
-        //todo
+        require(tokenAddress != 0x0);
+        uint amount = calculateERC20OwnedToContributor(_tokenAddress, recipient);
+        contributors[recipient].payedOut[_tokenAddress] += amount;
+        ERC20Basic(_tokenAddress).transfer(recipient, amount);
+    }
+
+    function withdrawToken() public {
+        sendOutToken(tokenAddress, msg.sender);
     }
 
     function withdrawCustomToken(address customTokenAddress) public{
-        require(sentToSale);
-        //todo
+        sendOutToken(customTokenAddress, msg.sender);
     }
     
     function pushOutToken(address recipient) public onlyAdmin{
-        require(sentToSale);
-        //todo
+        sendOutToken(tokenAddress, recipient);
     }
     
     function changeTokenAddress(address _tokenAddress) public onlyCreator{
@@ -210,7 +228,7 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(sentToSale);
         require(!tokensReceivedConfirmed);
         require (tokensExpected > 0);
-        if(ERC20(tokenAddress).balanceOf(address(this)) > tokensExpected) tokensReceivedConfirmed = true;
+        if(ERC20Basic(tokenAddress).balanceOf(address(this)) > tokensExpected) tokensReceivedConfirmed = true;
     }
     
     function sendToSale() public onlyAdmin{
@@ -247,8 +265,6 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(bytes(saleParticipateFunctionSig).length > 0);
         require(sentToSale);
         require(saleAddress.call(saleWithdrawFunctionSig));
-
-        //todo
     }    
 
     function () public payable {

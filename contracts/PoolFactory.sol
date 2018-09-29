@@ -19,7 +19,7 @@ contract PoolFactory{
     constructor (address _kycAddress, uint _flatFee, uint _maxAllocationFeeRate, uint _maxCreatorFeeRate, uint _providerFeeRate) public {
         owner = msg.sender;
         kycAddress = _kycAddress;
-        flatFee = flatFee;
+        flatFee = _flatFee;
         maxAllocationFeeRate = _maxAllocationFeeRate;
         maxCreatorFeeRate = _maxCreatorFeeRate;
         providerFeeRate = _providerFeeRate;

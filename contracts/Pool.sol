@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+pragma experimental ABIEncoderV2;
 
 import './KYC.sol';
 import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
@@ -30,7 +31,7 @@ contract Pool {
     uint public minPoolGoal;  //minimum amount needed for the sale
     uint public maxPoolAllocation; //maximum amount raisable by pool
     uint public withdrawTimelock;
-    mapping(string => bool) public kycCountryBlacklist; //key: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+    mapping(bytes3 => bool) public kycCountryBlacklist; //key: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
     string public saleParticipateFunctionSig;
     string public saleWithdrawFunctionSig;
     
@@ -42,6 +43,24 @@ contract Pool {
     uint public creatorStash;
     uint public providerStash;
     bool tokensReceivedConfirmed;
+
+    struct PoolData{
+        address kycAddress;
+        address provider;
+        address creator;
+        uint creatorFeeRate;
+        uint providerFeeRate;
+        address saleAddress;
+        address tokenAddress;
+        bool whitelistPool;
+        uint saleStartDate;
+        uint saleEndDate;
+        uint minContribution;
+        uint maxContribution;
+        uint minPoolGoal;
+        uint maxPoolAllocation;
+        uint withdrawTimelock;
+    }
     
     modifier onlyCreator{
         require(msg.sender == creator);
@@ -64,27 +83,23 @@ contract Pool {
     }
     
     constructor(
-        address _kycAddress, address _provider, address _creator, uint _creatorFeeRate, 
-        uint _providerFeeRate, address _saleAddress, address _tokenAddress, bool _whitelistPool,
-        uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, 
-        uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock
-    ) public {
-        kycAddress = _kycAddress;
-        provider = _provider;
-        creator = _creator;
-        admins[creator] = true;
-        providerFeeRate = _providerFeeRate;
-        creatorFeeRate = _creatorFeeRate;
-        saleAddress = _saleAddress;
-        tokenAddress = _tokenAddress;
+        address[5] addresses, uint[9] integers, bool _whitelistPool) public {
+        kycAddress = addresses[0];
+        provider = addresses[1];
+        creator = addresses[2];
+        saleAddress = addresses[3];
+        tokenAddress = addresses[4];
+        providerFeeRate = integers[0];
+        creatorFeeRate = integers[1];
+        saleStartDate = integers[2];
+        saleEndDate = integers[3];
+        minContribution = integers[4];
+        maxContribution = integers[5];
+        minPoolGoal = integers[6];
+        maxPoolAllocation = integers[7];
+        withdrawTimelock = integers[8];
         whitelistPool = _whitelistPool;
-        saleStartDate = _saleStartDate;
-        saleEndDate = _saleEndDate;
-        minContribution = _minContribution;
-        maxContribution = _maxContribution;
-        minPoolGoal = _minPoolGoal;
-        maxPoolAllocation = _maxPoolAllocation;
-        withdrawTimelock = _withdrawTimelock;
+        admins[creator] = true;
     }
     
     function addAdmin(address[] addressList) public onlyCreator {
@@ -121,15 +136,15 @@ function addAdmin(address adminAddress) public onlyCreator {
 
     function addCountryBlacklist(bytes3[] countryList) public onlyAdmin {
         for(uint i = 0; i < countryList.length; i++){
-            kycCountryBlacklist[bytes3ToString(countryList[i])] = true;
+            kycCountryBlacklist[countryList[i]] = true;
         }
     }
 
-    function addCountryBlacklist(string country) public onlyAdmin {
+    function addCountryBlacklist(bytes3 country) public onlyAdmin {
         kycCountryBlacklist[country] = true;
     }
 
-    function removeCountryBlacklist(string country) public onlyAdmin {
+    function removeCountryBlacklist(bytes3 country) public onlyAdmin {
         kycCountryBlacklist[country] = false;
     }
     
@@ -208,7 +223,10 @@ function addAdmin(address adminAddress) public onlyCreator {
 
     function sendToSaleFunction() public onlyAdmin {
         require(bytes(saleParticipateFunctionSig).length > 0);
-        //todo
+        require(!sentToSale);
+        takeFees();
+        sentToSale = true;
+        require(saleAddress.call.value(calculateNetContribution())(saleParticipateFunctionSig));
     }
 
     function takeFees() private returns(uint) {
@@ -227,6 +245,9 @@ function addAdmin(address adminAddress) public onlyCreator {
 
     function withdrawFromSaleFunction() public onlyAdmin{
         require(bytes(saleParticipateFunctionSig).length > 0);
+        require(sentToSale);
+        require(saleAddress.call(saleWithdrawFunctionSig));
+
         //todo
     }    
 

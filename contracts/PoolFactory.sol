@@ -31,17 +31,28 @@ contract PoolFactory{
     }
 
     function createPool(
-        uint _creatorFeeRate, address _saleAddress, address _tokenAddress, bool _whitelistPool, 
-        uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, 
-        uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock
+        address _saleAddress, 
+        address _tokenAddress, 
+        uint _creatorFeeRate, 
+        uint _saleStartDate, 
+        uint _saleEndDate, 
+        uint _minContribution, 
+        uint _maxContribution, 
+        uint _minPoolGoal, 
+        uint _maxPoolAllocation, 
+        uint _withdrawTimelock, 
+        bool _whitelistPool
     ) public payable {
         require(KYC(kycAddress).checkKYC(msg.sender));
         require(flatFee + maxAllocationFeeRate * _maxPoolAllocation >= msg.value);
         require(maxCreatorFeeRate >= _creatorFeeRate);
-        address poolAddress = new Pool(kycAddress, owner, msg.sender, _creatorFeeRate, providerFeeRate, _saleAddress, 
-        _tokenAddress, _whitelistPool, _saleStartDate, _saleEndDate,
-        _minContribution, _maxContribution, _minPoolGoal, _maxPoolAllocation,
-        _withdrawTimelock);
+        address poolAddress = new Pool(
+            [kycAddress, owner, msg.sender, _saleAddress, _tokenAddress],
+            [providerFeeRate, _creatorFeeRate, _saleStartDate, _saleEndDate, 
+            _minContribution, _maxContribution, _minPoolGoal, _maxPoolAllocation,
+            _withdrawTimelock],
+            _whitelistPool
+            );
         poolList.push(poolAddress);
         poolsBySales[_saleAddress].push(poolAddress);
         pools[poolAddress] = true;
@@ -68,7 +79,7 @@ contract PoolFactory{
     }
 
     function wtihdraw() public onlyOwner{
-        owner.transfer(this.balance);
+        owner.transfer(address(this).balance);
     }
 
     function () public payable{

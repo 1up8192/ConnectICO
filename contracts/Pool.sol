@@ -141,17 +141,11 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(maxPoolAllocation == 0 || msg.value + allGrossContributions <= maxPoolAllocation);
         require(now < saleEndDate);
         require(!sentToSale);
-
         contributors[msg.sender].lastContributionTime = now; 
         if(contributors[msg.sender].lastContributionTime == 0) contributorList.push(msg.sender);
         contributors[msg.sender].grossContribution += msg.value;
         allGrossContributions += msg.value;
     }
-
-    function detectReContributor() private {
-        if(contributors[msg.sender].payedOut) contributors[msg.sender].payedOut = false;
-    }
-
 
     function reciprocalContributionRationPow18(address contributor) private view returns (uint) {
         return allGrossContributions ** ETHEREUM_DECIMALS / contributors[msg.sender].grossContribution;
@@ -164,12 +158,10 @@ function addAdmin(address adminAddress) public onlyCreator {
     function withdraw() public{
         require(!sentToSale);
         require(contributors[msg.sender].lastContributionTime + withdrawTimelock > now);
-        require(!contributors[msg.sender].payedOut);
-        contributors[msg.sender].payedOut = true;
+        require(contributors[msg.sender].grossContribution > 0);
         allGrossContributions -= contributors[msg.sender].grossContribution;
         uint amount = contributors[msg.sender].grossContribution;
         contributors[msg.sender].grossContribution = 0;
-        contributors[msg.sender].payedOut = true;
         msg.sender.transfer(amount);        
     }
 
@@ -210,8 +202,8 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(bytes(saleParticipateFunctionSig).length == 0);
         require(!sentToSale);
         takeFees();
-        saleAddress.transfer(calculateNetContribution());
         sentToSale = true;
+        saleAddress.transfer(calculateNetContribution());        
     }
 
     function sendToSaleFunction() public onlyAdmin {

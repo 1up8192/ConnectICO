@@ -87,4 +87,6 @@ contract PoolFactory{
     }
 
     //todo require error messages
+
+    //todo safe math
 }

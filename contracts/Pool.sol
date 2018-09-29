@@ -196,6 +196,7 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(sentToSale);
         uint amount = calculateETHOwnedToContributor(msg.sender);
         contributors[msg.sender].payedOut[0x0] += amount;
+        totalPayedOut[0x0] += amount;
         msg.sender.transfer(amount);
     }
     
@@ -204,6 +205,7 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(tokenAddress != 0x0);
         uint amount = calculateERC20OwnedToContributor(_tokenAddress, recipient);
         contributors[recipient].payedOut[_tokenAddress] += amount;
+        totalPayedOut[_tokenAddress] += amount;
         ERC20Basic(_tokenAddress).transfer(recipient, amount);
     }
 
@@ -305,7 +307,5 @@ function addAdmin(address adminAddress) public onlyCreator {
     //todo require error messages
 
     //todo safe math
-
-    //todo handle more drops
 
 }

@@ -35,7 +35,6 @@ contract PoolFactory{
         uint _saleStartDate, uint _saleEndDate, uint _minContribution, uint _maxContribution, 
         uint _minPoolGoal, uint _maxPoolAllocation, uint _withdrawTimelock
     ) public payable {
-        //todo checks
         require(KYC(kycAddress).checkKYC(msg.sender));
         require(flatFee + maxAllocationFeeRate * _maxPoolAllocation >= msg.value);
         require(maxCreatorFeeRate >= _creatorFeeRate);

@@ -11,12 +11,13 @@ contract Pool {
         bool payedOut;
     }
 
+    uint ETHEREUM_DECIMALS = 18;
 
     address public kycAddress;   
     address public provider; //connectICO address for fees
     address public creator; //pool creator address
-    uint public providerFeeRate;
-    uint public creatorFeeRate;
+    uint public providerFeeRate; // 1/1000
+    uint public creatorFeeRate; // 1/1000
     mapping(address => bool) public admins; //additional admins
     address public saleAddress; //address of token sale
     address public tokenAddress; // address of erc20 token contract
@@ -24,12 +25,14 @@ contract Pool {
     mapping(address => bool) public whitelist; 
     uint public saleStartDate;
     uint public saleEndDate;
-    uint public minContribution; //minimum amount expected from pool partocopants
-    uint public maxContribution; //maximum amount expected from pool partocopants 0: no limit
+    uint public minContribution; //minimum amount expected from pool particopants
+    uint public maxContribution; //maximum amount expected from pool particopants 0: no limit
     uint public minPoolGoal;  //minimum amount needed for the sale
     uint public maxPoolAllocation; //maximum amount raisable by pool
     uint public withdrawTimelock;
-    mapping(string => bool) kycCountryBlacklist; //key: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+    mapping(string => bool) public kycCountryBlacklist; //key: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+    string public saleParticipateFunctionSig;
+    string public saleWithdrawFunctionSig;
     
     
     uint public allGrossContributions;
@@ -133,7 +136,7 @@ function addAdmin(address adminAddress) public onlyCreator {
     function contribute() public payable {
         if(whitelistPool) require(whitelist[msg.sender]);
         require(KYC(kycAddress).checkKYC(msg.sender));
-        require(msg.value >= minContribution);
+        if (contributors[msg.sender].grossContribution == 0) require(msg.value >= minContribution); //only if first time contrib
         require(maxContribution == 0 || msg.value <= maxContribution);
         require(maxPoolAllocation == 0 || msg.value + allGrossContributions <= maxPoolAllocation);
         require(now < saleEndDate);
@@ -148,9 +151,14 @@ function addAdmin(address adminAddress) public onlyCreator {
     function detectReContributor() private {
         if(contributors[msg.sender].payedOut) contributors[msg.sender].payedOut = false;
     }
-    
-    function calculateFee(uint value, uint feePerThousand) private pure returns(uint fee) {
-        return value / 1000 * feePerThousand;
+
+
+    function reciprocalContributionRationPow18(address contributor) private view returns (uint) {
+        return allGrossContributions ** ETHEREUM_DECIMALS / contributors[msg.sender].grossContribution;
+    }
+
+    function calculateReward(uint toDistribute, address contributor) private view returns (uint) {
+        return toDistribute ** ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor);
     }
     
     function withdraw() public{
@@ -199,16 +207,38 @@ function addAdmin(address adminAddress) public onlyCreator {
     }
     
     function sendToSale() public onlyAdmin{
-        //todo
-        //take fees
+        require(bytes(saleParticipateFunctionSig).length == 0);
+        require(!sentToSale);
+        takeFees();
+        saleAddress.transfer(calculateNetContribution());
+        sentToSale = true;
     }
 
-    function calculateNetContribution() public view {
+    function sendToSaleFunction() public onlyAdmin {
+        require(bytes(saleParticipateFunctionSig).length > 0);
         //todo
     }
-    
 
-    function () public payable{
+    function takeFees() private returns(uint) {
+        creatorStash = calculateFee(allGrossContributions, creatorFeeRate);
+        providerStash = calculateFee(allGrossContributions, providerFeeRate);
+    }
+
+
+    function calculateNetContribution() private view returns (uint) {
+        return allGrossContributions - creatorStash - providerStash;
+    }
+
+    function calculateFee(uint value, uint feePerThousand) private pure returns(uint fee) {
+        return value / 1000 * feePerThousand;
+    }
+
+    function withdrawFromSaleFunction() public onlyAdmin{
+        require(bytes(saleParticipateFunctionSig).length > 0);
+        //todo
+    }    
+
+    function () public payable {
         //empty fallback to take refund tx-s
     }
 
@@ -241,10 +271,12 @@ function addAdmin(address adminAddress) public onlyCreator {
         return string(bytesStringTrimmed);
     }
 
-    //todo fee taking
-
     //todo setters
 
     //todo require error messages
+
+    //todo safe math
+
+    //todo handle more drops
 
 }

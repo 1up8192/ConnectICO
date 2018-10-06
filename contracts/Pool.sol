@@ -1,7 +1,11 @@
 pragma solidity ^0.4.24;
 
 import './KYC.sol';
+import './SemiSafeMath.sol';
 import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol';
+import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
+
+
 
 contract Pool {
     
@@ -153,40 +157,40 @@ contract Pool {
         require(KYC(kycAddress).checkKYC(msg.sender));
         if (contributors[msg.sender].grossContribution == 0) require(msg.value >= minContribution); //only if first time contrib
         require(maxContribution == 0 || msg.value <= maxContribution);
-        require(maxPoolAllocation == 0 || msg.value + allGrossContributions <= maxPoolAllocation);
-        require(now < saleEndDate);
+        require(maxPoolAllocation == 0 || SafeMath.add(msg.value, allGrossContributions) <= maxPoolAllocation);
+        require(block.timestamp < saleEndDate);
         require(!sentToSale);
-        contributors[msg.sender].lastContributionTime = now; 
+        contributors[msg.sender].lastContributionTime = block.timestamp;
         if(contributors[msg.sender].lastContributionTime == 0) contributorList.push(msg.sender);
-        contributors[msg.sender].grossContribution += msg.value;
-        allGrossContributions += msg.value;
+        contributors[msg.sender].grossContribution = SafeMath.add(contributors[msg.sender].grossContribution, msg.value);
+        allGrossContributions = SafeMath.add(allGrossContributions, msg.value);
     }
 
     function reciprocalContributionRationPow18(address contributor) private view returns (uint) {
-        return allGrossContributions ** ETHEREUM_DECIMALS / contributors[contributor].grossContribution;
+        return SemiSafeMath.pow(allGrossContributions, ETHEREUM_DECIMALS / contributors[contributor].grossContribution);
     }
 
     function calculateReward(uint toDistribute, address contributor) private view returns (uint) {
-        return toDistribute ** ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor);
+        return SemiSafeMath.pow(toDistribute, ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor));
     }
 
     function calculateERC20OwnedToContributor(address tokenType, address contributor) private view returns (uint) {
-        uint totalIncome = totalPayedOut[tokenType] + ERC20Basic(tokenType).balanceOf(address(this));
+        uint totalIncome = SafeMath.add(totalPayedOut[tokenType], ERC20Basic(tokenType).balanceOf(address(this)));
         uint totalReward = calculateReward(totalIncome, contributor);
-        return totalReward - contributors[contributor].payedOut[tokenType];
+        return SafeMath.sub(totalReward, contributors[contributor].payedOut[tokenType]);
     }
 
     function calculateETHOwnedToContributor(address contributor) private view returns (uint) {
-        uint totalIncome = totalPayedOut[0x0] + (address(this).balance - (creatorStash + providerStash));
+        uint totalIncome = SafeMath.add(totalPayedOut[0x0], SafeMath.sub(address(this).balance, SafeMath.add(creatorStash, providerStash)));
         uint totalReward = calculateReward(totalIncome, contributor);
-        return totalReward - contributors[contributor].payedOut[0x0];
+        return SafeMath.sub(totalReward, contributors[contributor].payedOut[0x0]);
     }
     
     function withdraw() public{
         require(!sentToSale);
-        require(contributors[msg.sender].lastContributionTime + withdrawTimelock > now);
+        require(SafeMath.add(contributors[msg.sender].lastContributionTime, withdrawTimelock) > block.timestamp);
         require(contributors[msg.sender].grossContribution > 0);
-        allGrossContributions -= contributors[msg.sender].grossContribution;
+        allGrossContributions = SafeMath.sub(allGrossContributions, contributors[msg.sender].grossContribution);
         uint amount = contributors[msg.sender].grossContribution;
         contributors[msg.sender].grossContribution = 0;
         msg.sender.transfer(amount);        
@@ -195,8 +199,8 @@ contract Pool {
     function withdrawRefund() public{
         require(sentToSale);
         uint amount = calculateETHOwnedToContributor(msg.sender);
-        contributors[msg.sender].payedOut[0x0] += amount;
-        totalPayedOut[0x0] += amount;
+        contributors[msg.sender].payedOut[0x0] = SafeMath.add(contributors[msg.sender].payedOut[0x0], amount);
+        totalPayedOut[0x0] = SafeMath.add(totalPayedOut[0x0], amount);
         msg.sender.transfer(amount);
     }
     
@@ -204,8 +208,8 @@ contract Pool {
         require(sentToSale);
         require(tokenAddress != 0x0);
         uint amount = calculateERC20OwnedToContributor(_tokenAddress, recipient);
-        contributors[recipient].payedOut[_tokenAddress] += amount;
-        totalPayedOut[_tokenAddress] += amount;
+        contributors[recipient].payedOut[_tokenAddress] = SafeMath.add(contributors[recipient].payedOut[_tokenAddress], amount);
+        totalPayedOut[_tokenAddress] = SafeMath.add(totalPayedOut[_tokenAddress], amount);
         ERC20Basic(_tokenAddress).transfer(recipient, amount);
     }
 
@@ -256,11 +260,11 @@ contract Pool {
 
 
     function calculateNetContribution() private view returns (uint) {
-        return allGrossContributions - creatorStash - providerStash;
+        return SafeMath.sub(allGrossContributions, SafeMath.sub(creatorStash, providerStash));
     }
 
     function calculateFee(uint value, uint feePerThousand) private pure returns(uint fee) {
-        return value / 1000 * feePerThousand;
+        return SafeMath.mul(value / 1000, feePerThousand);
     }
 
     function withdrawFromSaleFunction() public onlyAdmin{
@@ -355,30 +359,6 @@ contract Pool {
         withdrawTimelock = _withdrawTimelock;
     }
 
-
-    /*
-    provider <address> - P
-    creator <address> - C
-    providerFeeRate <uint> - P
-    creatorFeeRate <uint> - C
-    admins <mapping(address => bool)> - C
-    saleAddress <address> - N
-    token <erc20> - C
-    whitelistPool <bool> - N
-    whitelist <mapping(address => bool)> - A
-    saleStartDate <uint> - C
-    saleEndDate <uint> - C
-    minContribution <uint> - C
-    maxContribution <uint> - C
-    minPoolGoal <uint> - C
-    maxPoolAllocation <uint> - P
-    withdrawTimelock <uint> - C
-    */
-
-    //todo setters
-
     //todo require error messages
-
-    //todo safe math
 
 }

@@ -5,8 +5,6 @@ import './SemiSafeMath.sol';
 import '../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol';
 import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-
-
 contract Pool {
     
     struct contributorData{
@@ -67,24 +65,26 @@ contract Pool {
     }
     
     modifier onlyCreator{
-        require(msg.sender == creator);
+        require(msg.sender == creator, "modifier onlyCreator: Error, tx was not initiated by creator address");
         _;
     }
     
     modifier onlyAdmin{
-        require(admins[msg.sender]);
+        require(admins[msg.sender], "modifier onlyAdmin: Error, tx was not initiated by admin address");
         _;
     }
     
     modifier onlyProvider{
-        require(msg.sender == provider);
+        require(msg.sender == provider, "modifier onlyProvider: Error, tx was not initiated by provider address");
         _;
     }
     
+    /*
     modifier onlyAdminOrProvider{
-        require(admins[msg.sender] || msg.sender == provider);
+        require(admins[msg.sender] || msg.sender == provider, "modifier onlyAdminOrProvider: Error, tx was not initiated by creator or provider address");
         _;
     }
+    */
     
     constructor(
         address[5] addresses, uint[9] integers, bool _whitelistPool) public {
@@ -108,13 +108,13 @@ contract Pool {
     
     function addAdmin(address[] addressList) public onlyCreator {
         for(uint i = 0; i < addressList.length; i++){
-            require(KYC(kycAddress).checkKYC(addressList[i]));
+            require(KYC(kycAddress).checkKYC(addressList[i]), "addAdmin(address[] addressList): Error, tx was not initiated by KYC address");
             admins[addressList[i]] = true;
         }
     }
 
     function addAdmin(address adminAddress) public onlyCreator {
-        require(KYC(kycAddress).checkKYC(adminAddress));
+        require(KYC(kycAddress).checkKYC(adminAddress), "addAdmin(address adminAddress): Error, tx was not initiated by KYC address");
         admins[adminAddress] = true;
     }
 
@@ -124,13 +124,13 @@ contract Pool {
 
     function addWhitelist(address[] addressList) public onlyAdmin {
         for(uint i = 0; i < addressList.length; i++){
-            require(KYC(kycAddress).checkKYC(addressList[i]));
+            require(KYC(kycAddress).checkKYC(addressList[i]), "addWhitelist(address[] addressList): Error, tx was not initiated by KYC address");
             whitelist[addressList[i]] = true;
         }
     }
 
     function addWhitelist(address whitelistAddress) public onlyAdmin {
-        require(KYC(kycAddress).checkKYC(whitelistAddress));
+        require(KYC(kycAddress).checkKYC(whitelistAddress), "addWhitelist(address whitelistAddress): Error, tx was not initiated by KYC address");
         whitelist[whitelistAddress] = true;
     }
 
@@ -153,13 +153,13 @@ contract Pool {
     }
     
     function contribute() public payable {
-        if(whitelistPool) require(whitelist[msg.sender]);
-        require(KYC(kycAddress).checkKYC(msg.sender));
-        if (contributors[msg.sender].grossContribution == 0) require(msg.value >= minContribution); //only if first time contrib
-        require(maxContribution == 0 || msg.value <= maxContribution);
-        require(maxPoolAllocation == 0 || SafeMath.add(msg.value, allGrossContributions) <= maxPoolAllocation);
-        require(block.timestamp < saleEndDate);
-        require(!sentToSale);
+        if(whitelistPool) require(whitelist[msg.sender], "contribute(): Error, tx was not initiated by whitelisted address");
+        require(KYC(kycAddress).checkKYC(msg.sender), "contribute(): Error, tx was not initiated by KYC address");
+        if (contributors[msg.sender].grossContribution == 0) require(msg.value >= minContribution, "contribute(): Error, tx value is lower than minimum allowed"); //only if first time contrib
+        require(maxContribution == 0 || msg.value <= maxContribution, "contribute(): Error, tx value is higher than maximum allowed");
+        require(maxPoolAllocation == 0 || SafeMath.add(msg.value, allGrossContributions) <= maxPoolAllocation, "contribute(): Error, all contributions are higher than maximum allowed");
+        require(block.timestamp < saleEndDate, "contribute(): Error, the sale has ended");
+        require(!sentToSale, "contribute(): Error, the pools funds were already sent to the sale");
         contributors[msg.sender].lastContributionTime = block.timestamp;
         if(contributors[msg.sender].lastContributionTime == 0) contributorList.push(msg.sender);
         contributors[msg.sender].grossContribution = SafeMath.add(contributors[msg.sender].grossContribution, msg.value);
@@ -186,18 +186,18 @@ contract Pool {
         return SafeMath.sub(totalReward, contributors[contributor].payedOut[0x0]);
     }
     
-    function withdraw() public{
-        require(!sentToSale);
-        require(SafeMath.add(contributors[msg.sender].lastContributionTime, withdrawTimelock) > block.timestamp);
-        require(contributors[msg.sender].grossContribution > 0);
+    function withdraw() public {
+        require(!sentToSale, "withdraw(): Error, the pools funds were already sent to the sale");
+        require(SafeMath.add(contributors[msg.sender].lastContributionTime, withdrawTimelock) > block.timestamp, "withdraw(): Error, the timelock is not over yet");
+        require(contributors[msg.sender].grossContribution > 0, "withdraw(): Error, tx sender has no funds in pool");
         allGrossContributions = SafeMath.sub(allGrossContributions, contributors[msg.sender].grossContribution);
         uint amount = contributors[msg.sender].grossContribution;
         contributors[msg.sender].grossContribution = 0;
         msg.sender.transfer(amount);        
     }
 
-    function withdrawRefund() public{
-        require(sentToSale);
+    function withdrawRefund() public {
+        require(sentToSale, "withdrawRefund(): Error, the pools funds were not sent to the sale yet");
         uint amount = calculateETHOwnedToContributor(msg.sender);
         contributors[msg.sender].payedOut[0x0] = SafeMath.add(contributors[msg.sender].payedOut[0x0], amount);
         totalPayedOut[0x0] = SafeMath.add(totalPayedOut[0x0], amount);
@@ -205,8 +205,8 @@ contract Pool {
     }
     
     function sendOutToken(address _tokenAddress, address recipient) private{
-        require(sentToSale);
-        require(tokenAddress != 0x0);
+        require(sentToSale, "sendOutToken(address _tokenAddress, address recipient): Error, the pools funds were not sent to the sale yet");
+        require(tokenAddress != 0x0, "sendOutToken(address _tokenAddress, address recipient): Error, ERC20 token addres cannot be 0x0, that is reserved for ether");
         uint amount = calculateERC20OwnedToContributor(_tokenAddress, recipient);
         contributors[recipient].payedOut[_tokenAddress] = SafeMath.add(contributors[recipient].payedOut[_tokenAddress], amount);
         totalPayedOut[_tokenAddress] = SafeMath.add(totalPayedOut[_tokenAddress], amount);
@@ -226,31 +226,31 @@ contract Pool {
     }
     
     function changeTokenAddress(address _tokenAddress) public onlyCreator{
-        require(!tokensReceivedConfirmed);
+        require(!tokensReceivedConfirmed, "changeTokenAddress(address _tokenAddress): Error, tokens are already confirmed as received");
         tokenAddress = _tokenAddress;
     }
 
     function confirmTokensReceived(uint tokensExpected) public onlyCreator{
-        require(sentToSale);
-        require(!tokensReceivedConfirmed);
-        require (tokensExpected > 0);
+        require(sentToSale, "confirmTokensReceived(uint tokensExpected): Error, the pools funds were not sent to the sale yet");
+        require(!tokensReceivedConfirmed, "confirmTokensReceived(uint tokensExpected): Error, tokens are already confirmed as received");
+        require (tokensExpected > 0, "confirmTokensReceived(uint tokensExpected): Error, number of tokens expected has to be greater than 0");
         if(ERC20Basic(tokenAddress).balanceOf(address(this)) > tokensExpected) tokensReceivedConfirmed = true;
     }
     
     function sendToSale() public onlyAdmin{
-        require(bytes(saleParticipateFunctionSig).length == 0);
-        require(!sentToSale);
+        require(bytes(saleParticipateFunctionSig).length == 0, "sendToSale(): Error, participation function signature is given, 'sendToSaleFunction()' has to be used");
+        require(!sentToSale, "sendToSale(): Error, the pools funds were already sent to the sale");
         takeFees();
         sentToSale = true;
         saleAddress.transfer(calculateNetContribution());        
     }
 
     function sendToSaleFunction() public onlyAdmin {
-        require(bytes(saleParticipateFunctionSig).length > 0);
-        require(!sentToSale);
+        require(bytes(saleParticipateFunctionSig).length > 0, "sendToSaleFunction(): Error, no participation function signature given");
+        require(!sentToSale, "sendToSaleFunction(): Error, the pools funds were already sent to the sale");
         takeFees();
         sentToSale = true;
-        require(saleAddress.call.value(calculateNetContribution())(bytes4(keccak256(saleParticipateFunctionSig))));
+        require(saleAddress.call.value(calculateNetContribution())(bytes4(keccak256(saleParticipateFunctionSig))), "Error, transaction failed");
     }
 
     function takeFees() private returns(uint) {
@@ -268,9 +268,9 @@ contract Pool {
     }
 
     function withdrawFromSaleFunction() public onlyAdmin{
-        require(bytes(saleParticipateFunctionSig).length > 0);
-        require(sentToSale);
-        require(saleAddress.call(bytes4(keccak256(saleWithdrawFunctionSig))));
+        require(bytes(saleParticipateFunctionSig).length > 0, "withdrawFromSaleFunction(): Error, no withdraw function signature given");
+        require(sentToSale, "withdrawFromSaleFunction(): Error, the pools funds were not sent to the sale yet");
+        require(saleAddress.call(bytes4(keccak256(saleWithdrawFunctionSig))), "withdrawFromSaleFunction(): Error, transaction failed");
     }    
 
     function () public payable {
@@ -323,7 +323,7 @@ contract Pool {
     }
 
     function setTokenAddress(address _tokenAddress) public onlyAdmin {
-        require(!tokensReceivedConfirmed);
+        require(!tokensReceivedConfirmed, "setTokenAddress(address _tokenAddress): Error, tokens are already confirmed as received");
         tokenAddress = _tokenAddress;
     }
 
@@ -358,7 +358,5 @@ contract Pool {
     function setWithdrawTimelock(uint _withdrawTimelock) public onlyCreator {
         withdrawTimelock = _withdrawTimelock;
     }
-
-    //todo require error messages
 
 }

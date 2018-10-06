@@ -58,6 +58,10 @@ contract PoolFactory{
         pools[poolAddress] = true;
     }
 
+    function setOwner(address _owner) public onlyOwner {
+        owner = _owner;
+    }
+
     function setKYCAddress(address _kycAddress) public onlyOwner {
         kycAddress = _kycAddress;
     }

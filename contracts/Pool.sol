@@ -109,7 +109,7 @@ contract Pool {
         }
     }
 
-function addAdmin(address adminAddress) public onlyCreator {
+    function addAdmin(address adminAddress) public onlyCreator {
         require(KYC(kycAddress).checkKYC(adminAddress));
         admins[adminAddress] = true;
     }
@@ -246,7 +246,7 @@ function addAdmin(address adminAddress) public onlyCreator {
         require(!sentToSale);
         takeFees();
         sentToSale = true;
-        require(saleAddress.call.value(calculateNetContribution())(saleParticipateFunctionSig));
+        require(saleAddress.call.value(calculateNetContribution())(bytes4(keccak256(saleParticipateFunctionSig))));
     }
 
     function takeFees() private returns(uint) {
@@ -266,7 +266,7 @@ function addAdmin(address adminAddress) public onlyCreator {
     function withdrawFromSaleFunction() public onlyAdmin{
         require(bytes(saleParticipateFunctionSig).length > 0);
         require(sentToSale);
-        require(saleAddress.call(saleWithdrawFunctionSig));
+        require(saleAddress.call(bytes4(keccak256(saleWithdrawFunctionSig))));
     }    
 
     function () public payable {
@@ -301,6 +301,79 @@ function addAdmin(address adminAddress) public onlyCreator {
         }
         return string(bytesStringTrimmed);
     }
+
+    function setProvider(address _provider) public onlyProvider {
+        provider = _provider;
+    }
+
+    function setCreator(address _creator) public onlyCreator {
+        creator = _creator;
+    }
+
+    function setProviderFeeRate(uint _providerFeeRate) public onlyProvider {
+        providerFeeRate = _providerFeeRate;
+    }
+
+    function setCreatorFeeRate(uint _creatorFeeRate) public onlyCreator {
+        creatorFeeRate = _creatorFeeRate;
+    }
+
+    function setTokenAddress(address _tokenAddress) public onlyAdmin {
+        require(!tokensReceivedConfirmed);
+        tokenAddress = _tokenAddress;
+    }
+
+    function setWhitelistPool(bool _whitelistPool) public onlyCreator {
+        whitelistPool = _whitelistPool;
+    }
+
+    function setSaleStartDate(uint _saleStartDate) public onlyCreator {
+        saleStartDate = _saleStartDate;
+    }
+
+    function saleEndDate(uint _saleEndDate) public onlyCreator {
+        saleEndDate = _saleEndDate;
+    }
+
+    function setMinContribution(uint _minContribution) public onlyCreator {
+        minContribution = _minContribution;
+    }
+
+    function setmaxContribution(uint _maxContribution) public onlyCreator {
+        maxContribution = _maxContribution;
+    }
+
+    function setMinPoolGoal(uint _minPoolGoal) public onlyCreator {
+        minPoolGoal = _minPoolGoal;
+    }
+
+    function setMaxPoolAllocation(uint _maxPoolAllocation) public onlyProvider {
+        maxPoolAllocation = _maxPoolAllocation;
+    }
+
+    function setWithdrawTimelock(uint _withdrawTimelock) public onlyCreator {
+        withdrawTimelock = _withdrawTimelock;
+    }
+
+
+    /*
+    provider <address> - P
+    creator <address> - C
+    providerFeeRate <uint> - P
+    creatorFeeRate <uint> - C
+    admins <mapping(address => bool)> - C
+    saleAddress <address> - N
+    token <erc20> - C
+    whitelistPool <bool> - N
+    whitelist <mapping(address => bool)> - A
+    saleStartDate <uint> - C
+    saleEndDate <uint> - C
+    minContribution <uint> - C
+    maxContribution <uint> - C
+    minPoolGoal <uint> - C
+    maxPoolAllocation <uint> - P
+    withdrawTimelock <uint> - C
+    */
 
     //todo setters
 

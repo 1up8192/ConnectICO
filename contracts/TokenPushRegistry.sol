@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
+
 contract TokenPushRegistry {
     
     address public owner;
@@ -9,12 +11,12 @@ contract TokenPushRegistry {
     mapping(address => address[]) public recipients;
 
     modifier onlyOwner{
-        require(msg.sender == owner);
+        require(msg.sender == owner, "modifier onlyOwner: Error, tx was not initiated by owner address");
         _;
     }
 
     modifier onlyPushServer{
-        require(msg.sender == pushServer);
+        require(msg.sender == pushServer, "onlyPushServer onlyOwner: Error, tx was not initiated by owner push server");
         _;
     }
 
@@ -25,14 +27,18 @@ contract TokenPushRegistry {
     }
 
     function add(address pool, uint gasPrice) public payable{
-        require(msg.value >= gasPrice * pushGasCost);
+        require(msg.value >= SafeMath.mul(gasPrice, pushGasCost), "add(address pool, uint gasPrice): Error, message value is less then gas needed");
         pushGasPrice[pool][msg.sender] = gasPrice;
         recipients[pool].push(msg.sender);
     }
 
     function takeGas(address pool, address recipient) public onlyPushServer{
-        pushServer.transfer(pushGasPrice[pool][recipient] * pushGasCost);
+        pushServer.transfer(SafeMath.mul(pushGasPrice[pool][recipient], pushGasCost));
         pushGasPrice[pool][recipient] = 0;
+    }
+
+    function setOwner(address _owner) public onlyOwner {
+        owner = _owner;
     }
 
     function setPushServer(address _pushServer) public onlyOwner {
@@ -42,7 +48,5 @@ contract TokenPushRegistry {
     function setpushGasCost(uint _pushGasCost) public onlyOwner {
         pushGasCost = _pushGasCost;
     }
-
-    //todo require error messages
 
 }

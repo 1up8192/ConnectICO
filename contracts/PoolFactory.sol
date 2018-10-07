@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import './Pool.sol';
 import './KYC.sol';
+import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract PoolFactory{
     address owner;
@@ -26,7 +27,7 @@ contract PoolFactory{
     }
 
     modifier onlyOwner{
-        require(msg.sender == owner);
+        require(msg.sender == owner, "modifier onlyOwner: Error, tx was not initiated by owner address");
         _;
     }
 
@@ -43,9 +44,9 @@ contract PoolFactory{
         uint _withdrawTimelock, 
         bool _whitelistPool
     ) public payable {
-        require(KYC(kycAddress).checkKYC(msg.sender));
-        require(flatFee + maxAllocationFeeRate * _maxPoolAllocation >= msg.value);
-        require(maxCreatorFeeRate >= _creatorFeeRate);
+        require(KYC(kycAddress).checkKYC(msg.sender), "createPool(...): Error, tx was not initiated by KYC address");
+        require(msg.value >= SafeMath.add(flatFee, SafeMath.mul(maxAllocationFeeRate, _maxPoolAllocation)), "createPool(...): Error, not enough value for fees");
+        require(maxCreatorFeeRate >= _creatorFeeRate, "createPool(...): Error, pool fee rate is greater than max allowed");
         address poolAddress = new Pool(
             [kycAddress, owner, msg.sender, _saleAddress, _tokenAddress],
             [providerFeeRate, _creatorFeeRate, _saleStartDate, _saleEndDate, 
@@ -87,7 +88,7 @@ contract PoolFactory{
     }
 
     function () public payable{
-        revert();
+        revert("Error: fallback function");
     }
 
     //todo require error messages

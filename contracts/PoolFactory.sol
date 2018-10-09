@@ -9,9 +9,9 @@ contract PoolFactory{
 
     address public kycAddress;
     uint public flatFee;
-    uint public maxAllocationFeeRate;
-    uint public maxCreatorFeeRate;
-    uint public providerFeeRate;
+    uint public maxAllocationFeeRate; // 1/1000
+    uint public maxCreatorFeeRate; // 1/1000
+    uint public providerFeeRate; // 1/1000
 
     address[] poolList;
     mapping (address => bool) pools;
@@ -45,7 +45,7 @@ contract PoolFactory{
         bool _whitelistPool
     ) public payable {
         require(KYC(kycAddress).checkKYC(msg.sender), "createPool(...): Error, tx was not initiated by KYC address");
-        require(msg.value >= SafeMath.add(flatFee, SafeMath.mul(maxAllocationFeeRate, _maxPoolAllocation)), "createPool(...): Error, not enough value for fees");
+        require(msg.value >= SafeMath.add(flatFee, SafeMath.mul(maxAllocationFeeRate, _maxPoolAllocation) / 1000), "createPool(...): Error, not enough value for fees");
         require(maxCreatorFeeRate >= _creatorFeeRate, "createPool(...): Error, pool fee rate is greater than max allowed");
         address poolAddress = new Pool(
             [kycAddress, owner, msg.sender, _saleAddress, _tokenAddress],
@@ -91,7 +91,4 @@ contract PoolFactory{
         revert("Error: fallback function");
     }
 
-    //todo require error messages
-
-    //todo safe math
 }

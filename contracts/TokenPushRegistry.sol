@@ -45,7 +45,7 @@ contract TokenPushRegistry {
         pushServer = _pushServer;
     }
 
-    function setpushGasCost(uint _pushGasCost) public onlyOwner {
+    function setPushGasCost(uint _pushGasCost) public onlyOwner {
         pushGasCost = _pushGasCost;
     }
 

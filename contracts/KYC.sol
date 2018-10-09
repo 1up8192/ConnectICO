@@ -73,4 +73,5 @@ contract KYC {
         }
         return string(bytesStringTrimmed);
     }
+    
 }

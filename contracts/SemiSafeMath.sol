@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-//pow operation with a wery weak but simple safety check
+//pow operation with a very weak but simple safety check
 
 library SemiSafeMath {
 

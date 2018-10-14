@@ -1,3 +1,4 @@
+var PoolFactory = artifacts.require('./PoolFactory')
 var ConvertLib = artifacts.require('./ConvertLib.sol')
 var MetaCoin = artifacts.require('./MetaCoin.sol')
 

@@ -335,7 +335,7 @@ contract Pool {
         saleStartDate = _saleStartDate;
     }
 
-    function saleEndDate(uint _saleEndDate) public onlyCreator {
+    function setSaleEndDate(uint _saleEndDate) public onlyCreator {
         saleEndDate = _saleEndDate;
     }
 
@@ -343,7 +343,7 @@ contract Pool {
         minContribution = _minContribution;
     }
 
-    function setmaxContribution(uint _maxContribution) public onlyCreator {
+    function setMaxContribution(uint _maxContribution) public onlyCreator {
         maxContribution = _maxContribution;
     }
 

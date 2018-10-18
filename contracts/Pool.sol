@@ -240,6 +240,9 @@ contract Pool {
     function sendToSale() public onlyAdmin{
         require(bytes(saleParticipateFunctionSig).length == 0, "sendToSale(): Error, participation function signature is given, 'sendToSaleFunction()' has to be used");
         require(!sentToSale, "sendToSale(): Error, the pools funds were already sent to the sale");
+        require(now >= saleStartDate, "sendToSale(): Error, sale hasn't started yet");
+        require(block.timestamp < saleEndDate, "sendToSale(): Error, the sale has ended");
+        require(calculateNetContribution() >= minPoolGoal, "sendToSale(): Not enough funds collected for sale");
         takeFees();
         sentToSale = true;
         saleAddress.transfer(calculateNetContribution());        
@@ -248,6 +251,9 @@ contract Pool {
     function sendToSaleFunction() public onlyAdmin {
         require(bytes(saleParticipateFunctionSig).length > 0, "sendToSaleFunction(): Error, no participation function signature given");
         require(!sentToSale, "sendToSaleFunction(): Error, the pools funds were already sent to the sale");
+        require(now >= saleStartDate, "sendToSaleFunction(): Error, sale hasn't started yet");
+        require(block.timestamp < saleEndDate, "sendToSaleFunction(): Error, the sale has ended");
+        require(calculateNetContribution() >= minPoolGoal, "sendToSaleFunction():: Not enough funds collected for sale");
         takeFees();
         sentToSale = true;
         require(saleAddress.call.value(calculateNetContribution())(bytes4(keccak256(saleParticipateFunctionSig))), "Error, transaction failed");

@@ -174,15 +174,15 @@ contract Pool {
         return SemiSafeMath.pow(toDistribute, ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor));
     }
 
-    function calculateERC20OwnedToContributor(address tokenType, address contributor) private view returns (uint) {
-        uint totalIncome = SafeMath.add(totalPayedOut[tokenType], ERC20Basic(tokenType).balanceOf(address(this)));
-        uint totalReward = calculateReward(totalIncome, contributor);
+    function calculateERC20OwedToContributor(address tokenType, address contributor) private view returns (uint) {
+        uint totalBalance = SafeMath.add(totalPayedOut[tokenType], ERC20Basic(tokenType).balanceOf(address(this)));
+        uint totalReward = calculateReward(totalBalance, contributor);
         return SafeMath.sub(totalReward, contributors[contributor].payedOut[tokenType]);
     }
 
-    function calculateETHOwnedToContributor(address contributor) private view returns (uint) {
-        uint totalIncome = SafeMath.add(totalPayedOut[0x0], SafeMath.sub(address(this).balance, SafeMath.add(creatorStash, providerStash)));
-        uint totalReward = calculateReward(totalIncome, contributor);
+    function calculateETHOwedToContributor(address contributor) private view returns (uint) {
+        uint totalBalance = SafeMath.add(totalPayedOut[0x0], SafeMath.sub(address(this).balance, SafeMath.add(creatorStash, providerStash)));
+        uint totalReward = calculateReward(totalBalance, contributor);
         return SafeMath.sub(totalReward, contributors[contributor].payedOut[0x0]);
     }
     
@@ -198,7 +198,7 @@ contract Pool {
 
     function withdrawRefund() public {
         require(sentToSale, "withdrawRefund(): Error, the pools funds were not sent to the sale yet");
-        uint amount = calculateETHOwnedToContributor(msg.sender);
+        uint amount = calculateETHOwedToContributor(msg.sender);
         contributors[msg.sender].payedOut[0x0] = SafeMath.add(contributors[msg.sender].payedOut[0x0], amount);
         totalPayedOut[0x0] = SafeMath.add(totalPayedOut[0x0], amount);
         msg.sender.transfer(amount);
@@ -207,7 +207,7 @@ contract Pool {
     function sendOutToken(address _tokenAddress, address recipient) private{
         require(sentToSale, "sendOutToken(address _tokenAddress, address recipient): Error, the pools funds were not sent to the sale yet");
         require(tokenAddress != 0x0, "sendOutToken(address _tokenAddress, address recipient): Error, ERC20 token addres cannot be 0x0, that is reserved for ether");
-        uint amount = calculateERC20OwnedToContributor(_tokenAddress, recipient);
+        uint amount = calculateERC20OwedToContributor(_tokenAddress, recipient);
         contributors[recipient].payedOut[_tokenAddress] = SafeMath.add(contributors[recipient].payedOut[_tokenAddress], amount);
         totalPayedOut[_tokenAddress] = SafeMath.add(totalPayedOut[_tokenAddress], amount);
         ERC20Basic(_tokenAddress).transfer(recipient, amount);
@@ -225,10 +225,12 @@ contract Pool {
         sendOutToken(tokenAddress, recipient);
     }
     
+    /*
     function changeTokenAddress(address _tokenAddress) public onlyCreator{
         require(!tokensReceivedConfirmed, "changeTokenAddress(address _tokenAddress): Error, tokens are already confirmed as received");
         tokenAddress = _tokenAddress;
     }
+    */
 
     function confirmTokensReceived(uint tokensExpected) public onlyCreator{
         require(sentToSale, "confirmTokensReceived(uint tokensExpected): Error, the pools funds were not sent to the sale yet");
@@ -328,7 +330,7 @@ contract Pool {
         creatorFeeRate = _creatorFeeRate;
     }
 
-    function setTokenAddress(address _tokenAddress) public onlyAdmin {
+    function setTokenAddress(address _tokenAddress) public onlyCreator {
         require(!tokensReceivedConfirmed, "setTokenAddress(address _tokenAddress): Error, tokens are already confirmed as received");
         tokenAddress = _tokenAddress;
     }

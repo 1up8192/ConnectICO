@@ -58,6 +58,8 @@ const App = {
 	/**
 	* Return all existing pool addresses in a list
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {string[]} all existing pool addresses in a list
 	*/
     getAllPools: async function(){
@@ -66,6 +68,8 @@ const App = {
   
 	/**
 	* Return one pool address of the given index
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @param {number} index
 	* @return {string} Pool address
@@ -76,6 +80,8 @@ const App = {
   
 	/**
 	*Returns a list of pool addresses between a first and last index (including boundaries)
+	* 
+	* Frontend page: PoolFactory info page
 	*
 	* @param {number} firstIndex 
 	* @param {number} lastIndex	
@@ -88,6 +94,8 @@ const App = {
 	/**
 	* Retuns the number of pools created by the pool factory
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {number} number of pools
 	*/
     getPoolNumber: async function(){
@@ -96,6 +104,8 @@ const App = {
   
 	/**
 	* Returns pool list for a sale address
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @param {string} saleAddress
 	* @return {string[]} list of pool adresses for a given sale
@@ -106,6 +116,8 @@ const App = {
   
 	/**
 	* Cheks if a pool exists
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @param {string} poolAddress
 	* @return {boolean} true if pool exists, fales if not
@@ -119,6 +131,8 @@ const App = {
 	/**
 	* Get owner address of pool factory
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {string} owner address of pool factory
 	*/
     getOwner: async function(){
@@ -127,6 +141,8 @@ const App = {
   
 	/**
 	* Get the KYC contract address tied to the PoolFactory contract
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @return {string} KYC contract address
 	*/
@@ -137,6 +153,8 @@ const App = {
 	/**
 	* Get flat fee for pool creation (1/1000)
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {BigNumber} flat fee for pool creation (1/1000)
 	*/
     getFlatFee: async function(){
@@ -145,6 +163,8 @@ const App = {
   
 	/**
 	* Get fee rate for maximum pool allocation (1/1000)
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @return {BigNumber} fee rate for maximum pool allocation (1/1000)
 	*/
@@ -155,6 +175,8 @@ const App = {
 	/**
 	* Get maximum allowed fee rates set by crators for pools (1/1000)
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {BigNumber} maximum allowed fee rate (1/1000)
 	*/
     getMaxCreatorFeeRate: async function(){
@@ -163,6 +185,8 @@ const App = {
   
 	/**
 	* Get provider fee rate for pools (1/1000)
+	*
+	* Frontend page: PoolFactory info page
 	*
 	* @return {BigNumber} Get provider fee rate for pools (1/1000)
 	*/
@@ -175,6 +199,8 @@ const App = {
 	/**
 	* Set owner address in PoolFactory contract, only current owner has authority
 	*
+	* Frontend page: PoolFactory admin page for provider/owner
+	*
 	* @param {string} ownerAddress
 	*/
     setOwner: async function(ownerAddress){
@@ -183,6 +209,8 @@ const App = {
   
 	/**
 	* Set KYC contract address in PoolFactory contract, only owner has authority
+	*
+	* Frontend page: PoolFactory admin page for provider/owner
 	*
 	* @param {string} kycContractAddress
 	*/
@@ -193,6 +221,8 @@ const App = {
 	/**
 	* Set flat fee in PoolFactory contract for creating pools, only owner has authority
 	*
+	* Frontend page: PoolFactory admin page for provider/owner
+	*
 	* @param {BigNumber} flatFee flat fee for pool creation
 	*/
     setFlatFee: async function(flatFee){
@@ -201,6 +231,8 @@ const App = {
   
 	/**
 	* Set maximum allocation fee for creating pools, only owner has authority
+	*
+	* Frontend page: PoolFactory admin page for provider/owner
 	*
 	* @param {BigNumber} maxAllocationFeeRate fee "taxing" the maximum allocation parameter
 	*/
@@ -211,6 +243,8 @@ const App = {
 	/**
 	* Set maximum allowed fee for pool creators, only owner has authority
 	*
+	* Frontend page: PoolFactory admin page for provider/owner
+	*
 	* @param {BigNumber} maxCreatorFeeRate maximum amount of fee creators can set for a pool
 	*/
     setMaxCreatorFeeRate: async function(maxCreatorFeeRate){
@@ -219,6 +253,8 @@ const App = {
   
 	/**
 	* Set provider fee rate for creating pools, only owner has authority
+	*
+	* Frontend page: PoolFactory admin page for provider/owner
 	*
 	* @param {BigNumber} providerFeeRate provider fees for pools
 	*/
@@ -231,6 +267,8 @@ const App = {
 	/**
 	* Retruns the whole ETH balace of the PoolFactory contract
 	*
+	* Frontend page: PoolFactory info page
+	*
 	* @return {BigNumber} the whole ETH balace of the PoolFactory contract
 	*/
     getPoolFactoryBalance: async function(){
@@ -240,7 +278,9 @@ const App = {
     //PoolFactory operations
 	
 	/**
-	*Function for creating pools, needs ethereum sent to it (payable)
+	* Function for creating pools, needs ethereum sent to it (payable)
+	*
+	* Frontend page: Pool creation page
 	*
 	* @param {string} saleAddress address of the ICO token sale contract
 	* @param {string} tokenAddress address of the erc20 token distributed in the sale
@@ -250,7 +290,7 @@ const App = {
 	* @param {BigNumber} minContribution minimum amount of ETH contribution allowed in one tx
 	* @param {BigNumber} maxContribution maximum amount of ETH contribution allowed in one tx
 	* @param {BigNumber} minPoolGoal minimum amount of ETH needed to be raised by the pool for the sale
-	* @param {BigNumber} maxPoolAllocation minimum amount of ETH allowed to be raised by the pool for the sale
+	* @param {BigNumber} maxPoolAllocation maximum amount of ETH allowed to be raised by the pool for the sale
 	* @param {BigNumber} withdrawTimelock unix timestamp in seconds for how much time funds are locked from withdrawal after contribution
 	* @param {boolean} whitelistPool pool has address whitelist or not
 	*/
@@ -271,10 +311,10 @@ const App = {
     },
   
 	/**
-	*Description
+	* Function for owner to withdraw accumulated fees from PoolFactory
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: PoolFactory admin page for provider/owner
+	*
 	*/
     withdraw: async function(){ //onlyOwner
 
@@ -284,174 +324,219 @@ const App = {
     //Pool param getters
 
 	/**
-	*Description
+	* Get the KYC contract address tied to the Pool contract
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} address of the KYC contract
 	*/
     getPoolKycContractAddress: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Address of the service provider (same as pool factory owner)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} address provider
 	*/
     getProviderAddress: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Address of the pool creator
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} pool creator address
 	*/
     getCreatorAddress: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get fee rate for the service provider after every pool income (1/1000)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} provider fee rate
 	*/
     getProviderFeeRate: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get fee rate for the pool creator after every pool income (1/1000)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} creator fee rate
 	*/
     getCreatorFeeRate: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get address of the ICO token sale contract the pool is raising funds for
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} sale contract address
 	*/
     getSaleAddress: async function(poolAddress){
 
     },    
-    
+	
+	/**
+	* Get address of the erc20 token distributed in the sale
+	*
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} token address
+	*/  
     getTokenAddress: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get minimum amount of ETH contribution allowed in one tx
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} minium contribution
 	*/    
     getMinContribution: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get maximum amount of ETH contribution allowed in one tx
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} maximum contribution
 	*/
     getMaxContribution: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Getminimum amount of ETH needed to be raised by the pool for the sale
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} minimum pool goal
 	*/
     getMinPoolGoal: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get maximum amount of ETH allowed to be raised by the pool for the sale
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} max pool goal
 	*/
     getMaxPoolGoal: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get unix timestamp in seconds for how much time funds are locked from withdrawal after contribution
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} withdraw timelock
 	*/
     getWithdrawTimelock: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get sale function signature for the case of sales, that unable to receive funds the anonymus fallback function
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} sale function signature
 	*/
     getSaleParticipateFunctionSig: async function(poolAddress){
 
     },
   
-	/**
-	*Description
+	/** 
+	* Get withdraw function signature for the case of sales, that unable push out tokens automatically
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string} withdraw function signature
 	*/
     getSaleWtidrawFunctionSig: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	*Check if the pool enforces a whitelist for participants
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {boolean} is whitelist pool
 	*/
     isWhitelistPool: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Checik if a given address is an admin address for the pool
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} address address to check
+	* @return {bool} is admin
 	*/
     isAdmin: async function(poolAddress, address){
 
     },
   
 	/**
-	*Description
+	* Check if the given address is on the whitelist of the pool
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} address address to check
+	* @return {bool} is on whitelist
 	*/
     isOnWhitelist: async function(poolAddress, address){
 
     },
   
 	/**
-	*Description
+	* Check a country code if its on blacklist for the pool
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} countryCode 3 letter country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) 
+	* @return {boolean} is on blacklist
 	*/
     isOnCountryBlacklist: async function(poolAddress, countryCode){
 
@@ -460,70 +545,85 @@ const App = {
     //Pool stats getters
 	
 	/**
-	*Description
+	* Get all ETH balance of a given pool contract
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} ETH balance
 	*/
     getPoolBalance: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get all ETH contributions of the pool without applying fees
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} all gross contributions
 	*/
     getAllGrossContributions: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get ETH amount that the pool creator collected from fees
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} creator stash
 	*/
     getCreatorStash: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get ETH amount that the service provider collected from fees
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {BigNumber} provider stash
 	*/
     getProviderStash: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get total token amouts that has been payed out the by pool by different tokens
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} tokenAddress address of the token we want to query the payout amount in ETH is 0x0
+	* @return {BigNumber} payout amount
 	*/
     getTotalPayedOutByToken: async function(poolAddress, tokenAddress){
 
     },
   
 	/**
-	*Description
+	* Cehck if the pool funds have been sent to sale
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {boolean} true: sent, false: not sent yet
 	*/
     isSentToSale: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Check if token receiving is confirmed
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {boolean} true: confirmed, false: not confirmed yet
 	*/
     areTokensReceivedConfirmed: async function(poolAddress){
 
@@ -532,60 +632,77 @@ const App = {
     //Pool contributor queries
 
 	/**
-	*Description
+	* Get the address list of all pool contributors
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {string[]} address list of all pool contributors
 	*/
     getAllContibutors: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get pool contributor address at index
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {number} index
+	* @return {string} pool contributor address
 	*/    
     getContributor: async function(poolAddress, index){
 
     },
   
 	/**
-	*Description
+	* Get number of individual pool contributors
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @return {number} number of individual pool contributors
 	*/
     getContributorNumber: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Get the least contribuition time of a specific contributor
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} contributorAddress address of contributor
+	* @return {BiGNumber} contribution time
 	*/
     getLastContributionTimeByContributor: async function(poolAddress, contributorAddress){
 
     },
   
 	/**
-	*Description
+	* Get ETH contribution amount before fees applied by pool contributor
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} contributorAddress contributor address
+	* @return {BigNumber} contribution amount
 	*/
     getGrossContributionByContributor: async function(poolAddress, contributorAddress){
 
     },
   
 	/**
-	*Description
+	* Get payout amounts by token by pool contributor
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool info page (can be the same as Pool contributor page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} contributorAddress contributor address
+	* @param {string} tokenAddress token address in case of ETH 0x0
+	* @return {BigNumber} tonken amount
 	*/
     getPayedOutByContributorByToken: async function(poolAddress, contributorAddress, tokenAddress){
 
@@ -594,220 +711,255 @@ const App = {
     //Pool operations
 
 	/**
-	*Description
+	* Add a new pool admin address (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} adminAddress address of new admin
 	*/
     addAdmin: async function(poolAddress, adminAddress){
 
     },
   
 	/**
-	*Description
+	* Add list of new admin addresses (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string[]} adminAddressList address list of new admins
 	*/
     addAdminList: async function(poolAddress, adminAddressList){
 
     },
   
 	/**
-	*Description
+	* Remove admin by address (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} adminAddress address of admin to remove
 	*/
     removeAdmin: async function(poolAddress, adminAddress){
 
     },
   
 	/**
-	*Description
+	* Add address to pool whiteslist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} whitelistAddress address to add to whitelist
 	*/
     addWhitelist: async function(poolAddress, whitelistAddress){
 
     },
   
 	/**
-	*Description
+	* Add list of addresses to pool whiteslist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string[]} whitelistAddressList list of addresses to add to whitelist
 	*/
     addWhitelistList: async function(poolAddress, whitelistAddressList){
 
     },
   
 	/**
-	*Description
+	* Remove address from pool whiteslist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} whitelistAddress address to remove from whitelist
 	*/
     removeWhitelist: async function(poolAddress, whitelistAddress){
 
     },
   
 	/**
-	*Description
+	* Add country code to country blacklist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} countryCode 3 letter country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) 
 	*/
     addCountryBlacklist: async function(poolAddress, countryCode){
 
     },
   
-	/**
-	*Description
+/**
+	* Add list of country codes to country blacklist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string[]} countryCode list of 3 letter country codes (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) 
 	*/
     addCountryBlacklistList: async function(poolAddress, countryCodeList){
 
     },
   
 	/**
-	*Description
+	* Remove country code from country blacklist (only admin)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} countryCode 3 letter country code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) 
 	*/
     removeCountryBlacklist: async function(poolAddress, countryCode){
 
     },
   
 	/**
-	*Description
+	* Contribute to pool payable - tx has to have ETH value
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool contributor page (can be the same as Pool info page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     contribute: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw funds from the token before being sent to sale
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool contributor page (can be the same as Pool info page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     withdraw: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw funds from the token after being sent to sale and being refunded from sale to pool contract
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool contributor page (can be the same as Pool info page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     withdrawRefund: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw main erc20 token from the pool (sepcified by tokenAddress)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool contributor page (can be the same as Pool info page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     withdrawToken: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw given erc20 token from the pool (sepcified by tokenAddress)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool contributor page (can be the same as Pool info page)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} tokenAddress erc 20 token address (this cannot be ETH, so no 0x0 allowed here)
 	*/
     withdrawCustomToken: async function(poolAddress, tokenAddress){
 
     },
   
 	/**
-	*Description
+	* Push out pool main tokens to participants (only admin, mostly for token push server)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool admins (but mostly called by token push server, might not even on frontend)
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} recipientAddress address to push out their coins
 	*/
     pushOutToken: async function(poolAddress, recipientAddress){
 
     },
   
 	/**
-	*Description
+	* Change erc20 token address distributed by the sale for the pool (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} tokenAddress new token address
 	*/
-    changeTokenAddress: async function(poolAddress, tokenAddress){
-
-    },
+    //DUPLICATE changeTokenAddress: async function(poolAddress, tokenAddress){ 
+	//
+    //},
   
 	/**
-	*Description
+	* Confirm that the tokens are received from the sale (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} tokensExpected amount of tokens expected from the sale
 	*/
     confirmTokensReceived: async function(poolAddress, tokensExpected){
 
     },
   
 	/**
-	*Description
+	* Send pool funds to sale (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     sendToSale: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Send pool funds to sale to predefined special function (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
 	*/
     sendToSaleFunction: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Whitdraw tokens from sale with predefined special function (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
 	*/
     withdrawFromSaleFunction: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw provider fee from the stash (onyl provider)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for provider
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
 	*/
     poviderWithdraw: async function(poolAddress){
 
     },
   
 	/**
-	*Description
+	* Withdraw creator fee from the stash (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
 	*/
     creatorWithdraw: async function(poolAddress){
 
@@ -816,130 +968,156 @@ const App = {
     //Pool param setters
 
 	/**
-	*Description
+	* Set provider address (only provider)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for provider
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
+	* @param {string} providerAddress new provider address
 	*/
     setProvider: async function(poolAddress, providerAddress){
 
     },
   
 	/**
-	*Description
+	* Set creator address (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
+	* @param {string} creatorAddress new creator address
 	*/
     setCreator: async function(poolAddress, creatorAddress){
 
     },
   
 	/**
-	*Description
+	* Set provider fee rate (only provider)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for provider
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
+	* @param {BigNumber} providerFeeRate new provider fee rate (1/100)
 	*/
     setProviderFeeRate: async function(poolAddress, providerFeeRate){
 
     },
   
 	/**
-	*Description
+	* Set creator fee rate (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with
+	* @param {BigNumber} creatorFeeRate new creator fee rate (1/100)
 	*/
     setCreatorFeeRate: async function(poolAddress, creatorFeeRate){
 
     },
   
 	/**
-	*Description
+	* Change erc20 token address distributed by the sale for the pool (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {string} tokenAddress new token address
 	*/
     setTokenAddress: async function(poolAddress, tokenAddress){
 
     },
   
 	/**
-	*Description
+	* Set if pool is whitelist pool (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {bool} isWhitelistPool
 	*/
     setWhitelistPool: async function(poolAddress, isWhitelistPool){
 
     },
   
 	/**
-	*Description
+	* Set new sale start date (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} saleStartDate
 	*/
     setSaleStartDate: async function(poolAddress, saleStartDate){
 
     },
   
 	/**
-	*Description
+	* Set new sale end date (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} saleEndDate
 	*/
     setSaleEndDate: async function(poolAddress, saleEndDate){
 
     },
   
 	/**
-	*Description
+	* Set new minimum amount of ETH contribution allowed in one tx (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} minContribution new minimum contribution
 	*/
     setMinContribution: async function(poolAddress, minContribution){
 
     },
   
 	/**
-	*Description
+	* Set new maximum amount of ETH contribution allowed in one tx (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} maxContribution new maximum contribution
 	*/
     setMaxContribution: async function(poolAddress, maxContribution){
 
     },
   
 	/**
-	*Description
+	* Set new minimum amount of ETH needed to be raised by the pool for the sale (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} minPoolGoal new minimum pool goal
 	*/
     setMinPoolGoal: async function(poolAddress, minPoolGoal){
 
     },
   
 	/**
-	*Description
+	* Set new maximum amount of ETH allowed to be raised by the pool for the sale (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} maxPoolAllocation new maximum pool allocation
 	*/
     setMaxPoolAllocation: async function(poolAddress, maxPoolAllocation){
 
     },
   
 	/**
-	*Description
+	* Set new unix timestamp in seconds for how much time funds are locked from withdrawal after contribution (only creator)
 	*
-	* @param {type} description
-	* @return {type} description
+	* Frontend page: Pool admin page for pool creator
+	*
+	* @param {string} poolAddress address of the Pool this function iteracts with 
+	* @param {BigNumber} withdrawTimelock new withdraw timelock
 	*/
     setWithdrawTimelock: async function(poolAddress, withdrawTimelock){
 

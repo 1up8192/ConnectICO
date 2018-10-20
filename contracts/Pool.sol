@@ -86,6 +86,10 @@ contract Pool {
     }
     */
     
+    /*constructor() public {
+        
+    }*/
+    
     constructor(
         address[5] addresses, uint[9] integers, bool _whitelistPool) public {
         kycAddress = addresses[0];
@@ -105,13 +109,13 @@ contract Pool {
         whitelistPool = _whitelistPool;
         admins[creator] = true;
     }
-    
-    function addAdmin(address[] addressList) public onlyCreator {
+
+    /*function addAdmin(address[] addressList) public onlyCreator {
         for(uint i = 0; i < addressList.length; i++){
             require(KYC(kycAddress).checkKYC(addressList[i]), "addAdmin(address[] addressList): Error, tx was not initiated by KYC address");
             admins[addressList[i]] = true;
         }
-    }
+    }*/
 
     function addAdmin(address adminAddress) public onlyCreator {
         require(KYC(kycAddress).checkKYC(adminAddress), "addAdmin(address adminAddress): Error, tx was not initiated by KYC address");
@@ -122,12 +126,12 @@ contract Pool {
         admins[adminAddress] = false;
     }
 
-    function addWhitelist(address[] addressList) public onlyAdmin {
+    /*function addWhitelist(address[] addressList) public onlyAdmin {
         for(uint i = 0; i < addressList.length; i++){
             require(KYC(kycAddress).checkKYC(addressList[i]), "addWhitelist(address[] addressList): Error, tx was not initiated by KYC address");
             whitelist[addressList[i]] = true;
         }
-    }
+    }*/
 
     function addWhitelist(address whitelistAddress) public onlyAdmin {
         require(KYC(kycAddress).checkKYC(whitelistAddress), "addWhitelist(address whitelistAddress): Error, tx was not initiated by KYC address");
@@ -138,11 +142,11 @@ contract Pool {
         whitelist[whitelistAddress] = false;
     }
 
-    function addCountryBlacklist(bytes3[] countryList) public onlyAdmin {
+    /*function addCountryBlacklist(bytes3[] countryList) public onlyAdmin {
         for(uint i = 0; i < countryList.length; i++){
             kycCountryBlacklist[countryList[i]] = true;
         }
-    }
+    }*/
 
     function addCountryBlacklist(bytes3 country) public onlyAdmin {
         kycCountryBlacklist[country] = true;
@@ -166,6 +170,7 @@ contract Pool {
         allGrossContributions = SafeMath.add(allGrossContributions, msg.value);
     }
 
+
     function reciprocalContributionRationPow18(address contributor) private view returns (uint) {
         return SemiSafeMath.pow(allGrossContributions, ETHEREUM_DECIMALS / contributors[contributor].grossContribution);
     }
@@ -173,6 +178,9 @@ contract Pool {
     function calculateReward(uint toDistribute, address contributor) private view returns (uint) {
         return SemiSafeMath.pow(toDistribute, ETHEREUM_DECIMALS / reciprocalContributionRationPow18(contributor));
     }
+
+
+
 
     function calculateERC20OwedToContributor(address tokenType, address contributor) private view returns (uint) {
         uint totalBalance = SafeMath.add(totalPayedOut[tokenType], ERC20Basic(tokenType).balanceOf(address(this)));
@@ -185,7 +193,7 @@ contract Pool {
         uint totalReward = calculateReward(totalBalance, contributor);
         return SafeMath.sub(totalReward, contributors[contributor].payedOut[0x0]);
     }
-    
+
     function withdraw() public {
         require(!sentToSale, "withdraw(): Error, the pools funds were already sent to the sale");
         require(SafeMath.add(contributors[msg.sender].lastContributionTime, withdrawTimelock) > block.timestamp, "withdraw(): Error, the timelock is not over yet");
@@ -203,8 +211,9 @@ contract Pool {
         totalPayedOut[0x0] = SafeMath.add(totalPayedOut[0x0], amount);
         msg.sender.transfer(amount);
     }
-    
-    function sendOutToken(address _tokenAddress, address recipient) private{
+
+
+    function sendOutToken(address _tokenAddress, address recipient) private {
         require(sentToSale, "sendOutToken(address _tokenAddress, address recipient): Error, the pools funds were not sent to the sale yet");
         require(tokenAddress != 0x0, "sendOutToken(address _tokenAddress, address recipient): Error, ERC20 token addres cannot be 0x0, that is reserved for ether");
         uint amount = calculateERC20OwedToContributor(_tokenAddress, recipient);
@@ -220,7 +229,7 @@ contract Pool {
     function withdrawCustomToken(address customTokenAddress) public{
         sendOutToken(customTokenAddress, msg.sender);
     }
-    
+
     function pushOutToken(address recipient) public onlyAdmin{
         sendOutToken(tokenAddress, recipient);
     }
@@ -297,7 +306,7 @@ contract Pool {
         creator.transfer(amount);
     }
 
-    function bytes3ToString(bytes3 x) private pure returns (string) {
+    /*function bytes3ToString(bytes3 x) private pure returns (string) {
         bytes memory bytesString = new bytes(3);
         uint charCount = 0;
         for (uint j = 0; j < 3; j++) {
@@ -312,7 +321,7 @@ contract Pool {
             bytesStringTrimmed[j] = bytesString[j];
         }
         return string(bytesStringTrimmed);
-    }
+    }*/
 
     function setProvider(address _provider) public onlyProvider {
         provider = _provider;
@@ -338,7 +347,6 @@ contract Pool {
     function setWhitelistPool(bool _whitelistPool) public onlyCreator {
         whitelistPool = _whitelistPool;
     }
-
     function setSaleStartDate(uint _saleStartDate) public onlyCreator {
         saleStartDate = _saleStartDate;
     }

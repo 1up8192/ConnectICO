@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './Pool.sol';
+//import './Pool.sol';
 import './KYC.sol';
 import '../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol';
 
@@ -47,7 +47,7 @@ contract PoolFactory{
         require(KYC(kycContractAddress).checkKYC(msg.sender), "createPool(...): Error, tx was not initiated by KYC address");
         require(msg.value >= SafeMath.add(flatFee, SafeMath.mul(maxAllocationFeeRate, _maxPoolAllocation) / 1000), "createPool(...): Error, not enough value for fees");
         require(maxCreatorFeeRate >= _creatorFeeRate, "createPool(...): Error, pool fee rate is greater than max allowed");
-        address poolAddress = new Pool(
+        /*address poolAddress = new Pool(
             [kycContractAddress, owner, msg.sender, _saleAddress, _tokenAddress],
             [providerFeeRate, _creatorFeeRate, _saleStartDate, _saleEndDate, 
             _minContribution, _maxContribution, _minPoolGoal, _maxPoolAllocation,
@@ -56,7 +56,7 @@ contract PoolFactory{
             );
         poolList.push(poolAddress);
         poolsBySales[_saleAddress].push(poolAddress);
-        pools[poolAddress] = true;
+        pools[poolAddress] = true;*/
     }
 
     function setOwner(address _owner) public onlyOwner {

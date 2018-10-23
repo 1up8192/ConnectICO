@@ -27,5 +27,8 @@ blockchain/history
 yarn.lock
 package-lock.json
 
+#ganache databases
+ganache-dbs
+
 
 # End of https://www.gitignore.io/api/soliditytruffle

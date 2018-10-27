@@ -27,8 +27,8 @@ contract Pool {
     mapping(address => bool) public whitelist; 
     uint public saleStartDate;
     uint public saleEndDate;
-    uint public minContribution; //minimum amount expected from pool particopants
-    uint public maxContribution; //maximum amount expected from pool particopants 0: no limit
+    uint public minContribution; //minimum amount expected from pool participants
+    uint public maxContribution; //maximum amount expected from pool participants 0: no limit
     uint public minPoolGoal;  //minimum amount needed for the sale
     uint public maxPoolAllocation; //maximum amount raisable by pool
     uint public withdrawTimelock;
@@ -159,8 +159,8 @@ contract Pool {
     function contribute() public payable {
         if(whitelistPool) require(whitelist[msg.sender], "contribute(): Error, tx was not initiated by whitelisted address");
         require(KYC(kycAddress).checkKYC(msg.sender), "contribute(): Error, tx was not initiated by KYC address");
-        if (contributors[msg.sender].grossContribution == 0) require(msg.value >= minContribution, "contribute(): Error, tx value is lower than minimum allowed"); //only if first time contrib
-        require(maxContribution == 0 || msg.value <= maxContribution, "contribute(): Error, tx value is higher than maximum allowed");
+        require(SafeMath.add(msg.value, contributors[msg.sender].grossContribution) >= minContribution, "contribute(): Error, tx value is lower than minimum allowed");
+        require(maxContribution == 0 || SafeMath.add(msg.value, contributors[msg.sender].grossContribution) <= maxContribution, "contribute(): Error, tx value is higher than maximum allowed");
         require(maxPoolAllocation == 0 || SafeMath.add(msg.value, allGrossContributions) <= maxPoolAllocation, "contribute(): Error, all contributions are higher than maximum allowed");
         require(block.timestamp < saleEndDate, "contribute(): Error, the sale has ended");
         require(!sentToSale, "contribute(): Error, the pools funds were already sent to the sale");
@@ -194,13 +194,19 @@ contract Pool {
         return SafeMath.sub(totalReward, contributors[contributor].payedOut[0x0]);
     }
 
-    function withdraw() public {
+    function withdraw(uint amount) public {
         require(!sentToSale, "withdraw(): Error, the pools funds were already sent to the sale");
         require(SafeMath.add(contributors[msg.sender].lastContributionTime, withdrawTimelock) > block.timestamp, "withdraw(): Error, the timelock is not over yet");
-        require(contributors[msg.sender].grossContribution > 0, "withdraw(): Error, tx sender has no funds in pool");
-        allGrossContributions = SafeMath.sub(allGrossContributions, contributors[msg.sender].grossContribution);
-        uint amount = contributors[msg.sender].grossContribution;
-        contributors[msg.sender].grossContribution = 0;
+        require(contributors[msg.sender].grossContribution >= amount, "withdraw(): Error, tx sender has not enough funds in pool");
+        require(SafeMath.sub(contributors[msg.sender].grossContribution, amount) >= minContribution || amount == 0, "withdraw(): Error, remaining contribution amount would have been less than 'minContribution'");
+        uint transferAmount;
+        if (amount == 0) {
+            transferAmount = contributors[msg.sender].grossContribution;
+        } else {
+            transferAmount = amount;
+        }
+        allGrossContributions = SafeMath.sub(allGrossContributions, transferAmount);
+        contributors[msg.sender].grossContribution = SafeMath.sub(contributors[msg.sender].grossContribution, transferAmount);
         msg.sender.transfer(amount);        
     }
 
@@ -235,6 +241,7 @@ contract Pool {
     }
     
     /*
+    (duplicate)
     function changeTokenAddress(address _tokenAddress) public onlyCreator{
         require(!tokensReceivedConfirmed, "changeTokenAddress(address _tokenAddress): Error, tokens are already confirmed as received");
         tokenAddress = _tokenAddress;

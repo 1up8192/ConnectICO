@@ -1,0 +1,66 @@
+connectico test plan
+
+manually trying everything
+
+scenario testing
+	create test environment
+		test helpers
+		mock sale/token contracts
+	js scenario tests for almost all scenarios
+	Scenario categories:
+		Pool Creator
+		Pool Admin
+		Pool User
+		Pool Factory Owner
+		Pool Factory User (Pool Creator)
+		Kyc Owner
+		Kyc User
+		
+	Scenario timeframes (only pool stuff)
+		before sale
+		during sale
+		after sale
+		--------------
+		before sending
+		after sending
+	Scenario operations
+		Pool 
+			contiribute
+				good
+				bad
+			withdraw (eth)
+				good
+				bad
+			withdraw refund
+				good
+				bad
+			withdraw token
+				good
+				bad
+			------------------------------
+			wthdraw stash-es
+				good
+				bad
+			send to sale-s
+				good
+				bad
+			withdraw token from sale-s
+				good
+				bad
+			setters
+				good
+				bad
+			other authorized stuff
+				good
+				bad
+			
+		Pool factory
+			create pool
+			------------------------------
+			withdraw stashes
+		KYC
+			
+	
+	
+unit testing
+	solidity unit tests for all functions which has logic

@@ -7,15 +7,10 @@ var TokenPushRegistry = artifacts.require('./TokenPushRegistry.sol')
 
 module.exports = function (deployer) {
 
-  deployer.deploy(SafeMath)
-  deployer.deploy(SemiSafeMath)
-  deployer.link(SafeMath, PoolFactory)
-  deployer.link(SemiSafeMath, PoolFactory)
-  deployer.deploy(KYC).then(function(){
-    deployer.deploy(PoolFactory, KYC.address, 0, 0, 0, 0)
 
+  deployer.deploy(KYC, {gas: 8000000}).then(function(){
+    //deployer.deploy(PoolFactory, KYC.address, 0, 0, 0, 0, {gas: 8000000})
   })
-  deployer.link(SafeMath, TokenPushRegistry)
-  deployer.deploy(TokenPushRegistry, 0x0, 0)
+  deployer.deploy(PoolFactory, 0x0, 0, 0, 0, 0, {gas: 8000000})
 
 }

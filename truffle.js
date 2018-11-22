@@ -8,6 +8,12 @@ module.exports = {
       port: 8545,
       network_id: '*', // Match any network id
       gas: 8000000
+    },
+    test: {
+      host: '127.0.0.1',
+      port: 8545,
+      network_id: '*', // Match any network id
+      gas: 8000000
     }
   },
   solc: {
@@ -15,5 +21,6 @@ module.exports = {
       enabled: true,
       runs: 200
     }
-  }
+  },
+  build: "webpack"
 }

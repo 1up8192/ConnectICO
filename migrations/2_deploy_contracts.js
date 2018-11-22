@@ -9,8 +9,8 @@ module.exports = function (deployer) {
 
 
   deployer.deploy(KYC, {gas: 8000000}).then(function(){
-    deployer.deploy(PoolFactory, KYC.address, 0, 0, 0, 0, {gas: 8000000})
+    return deployer.deploy(PoolFactory, KYC.address, 0, 0, 0, 0, {gas: 8000000})
   })
-  //deployer.deploy(PoolFactory, 0x0, 0, 0, 0, 0, {gas: 8000000})
+  //deployer.deploy(PoolFactory, KYC.address, 0, 0, 0, 0, {gas: 8000000})
 
 }

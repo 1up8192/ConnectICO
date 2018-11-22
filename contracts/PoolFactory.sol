@@ -20,6 +20,7 @@ contract PoolFactory{
     address[] public poolList;
     mapping (address => bool) public pools;
     mapping (address => address[]) public poolsBySales;
+    //creator whitelist
 
     event poolCreated(address poolAddress);
 

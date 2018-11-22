@@ -233,7 +233,7 @@ const App = {
 	 * 
 	 * Frontend page: PoolFactory info page
 	 * 
-	 * @typedef {Object} Params
+	 * @typedef {Object} PoolFactoryParams
 	 * 
 	 * @property {string} owner - address of pool factory
 	 * @property {string} kycContractAddress - KYC contract address
@@ -242,7 +242,7 @@ const App = {
 	 * @property {number} maxCreatorFeeRate - maximum allowed fee rate (1/1000)
 	 * @property {number} providerFeeRate - provider fee rate for pools (1/1000)
 	 * 
-	 * @return {Params}
+	 * @return {PoolFactoryParams}
 	 */
 	
 	getPoolFactoryParams: async function(){
@@ -718,7 +718,88 @@ const App = {
     },
   
     //Pool
-    //Pool param getters
+	//Pool param getters
+	
+	/**
+	 * Get all Pool parameters
+	 * 
+	 * Frontend page: Pool info page (can be the same as Pool contributor page)
+	 * 
+	 * @param {string} poolAddress address of the Pool this function iteracts with 
+	 *
+	 * @typedef {Object} PoolParams
+	 * 
+	 * @property {string} saleParticipateFunctionSig - 
+	 * @property {string} saleWithdrawFunctionSig - 
+	 * @property {string} saleAddress - 
+	 * @property {string} tokenAddress - 
+	 * @property {string} kycAddress - 
+	 * @property {string} provider - 
+	 * @property {string} creator - 
+	 * @property {number} minContribution - 
+	 * @property {number} maxContribution - 
+	 * @property {number} minPoolGoal - 
+	 * @property {number} maxPoolAllocation - 
+	 * @property {number} saleStartDate - 
+	 * @property {number} saleEndDate - 
+	 * @property {number} maxPoolAllocation - 
+	 * @property {number} withdrawTimelock - 
+	 * @property {number} providerFeeRate - 
+	 * @property {number} creatorFeeRate - 
+	 * @property {boolean} whitelistPool - 
+	 * 
+	 * @return {PoolParams}
+	 */
+	
+	getPoolFactoryParams: async function(){
+		var instance;
+		var result = {
+			saleParticipateFunctionSig: null,
+			saleWithdrawFunctionSig: null,
+			saleAddress: null,
+			tokenAddress: null,
+			kycAddress: null,
+			provider: null,
+			creator: null,
+			minContribution: null,
+			maxContribution: null,
+			minPoolGoal: null,
+			maxPoolAllocation: null,
+			saleStartDate: null,
+			saleEndDate: null,
+			maxPoolAllocation: null,
+			withdrawTimelock: null,
+			providerFeeRate: null,
+			creatorFeeRate: null,
+			whitelistPool: null 
+		}
+		PoolFactory.at(poolAddress).then(function(_instance) {
+			instance = _instance;
+			return instance.params.call(poolAddress, {from: account});
+		}).then(function(value) {
+			result.saleParticipateFunctionSig = value[0].toString();
+			result.saleWithdrawFunctionSig = value[1].toString();
+			result.saleAddress = value[2].toString();
+			result.tokenAddress = value[3].toString();
+			result.kycAddress = value[4].toString();
+			result.provider = value[5].toString();
+			result.creator = value[6].toString();
+			result.minContribution = value[7].toNumber();
+			result.maxContribution = value[8].toNumber();
+			result.minPoolGoal = value[9].toNumber();
+			result.maxPoolAllocation = value[10].toNumber();
+			result.saleStartDate = value[11].toNumber();
+			result.saleEndDate = value[12].toNumber();
+			result.maxPoolAllocation = value[13].toNumber();
+			result.withdrawTimelock = value[14].toNumber();
+			result.providerFeeRate = value[15].toNumber();
+			result.creatorFeeRat = value[16].toNumber();
+			result.whitelistPool = value[17].toBoolean();
+			console.log(result);
+			output.innerHTML = result;
+			return result;
+		});
+	},
 
 	/**
 	* Get the KYC contract address tied to the Pool contract
